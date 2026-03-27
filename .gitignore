@@ -60,3 +60,28 @@ frontend/yarn.lock
 *.swp
 *.swo
 *~
+
+# Docker volumes / data
+docker/postgres_data/
+
+# Maven wrapper jar
+.mvn/wrapper/maven-wrapper.jar
+
+# Spring Boot local overrides
+**/application-local.yml
+**/application-local.properties
+**/application-dev.yml
+**/application-prod.yml
+
+# Sensitive migration files (contain seed credentials / schema details)
+incident-service/src/main/resources/db/migration/V1__create_incidents_table.sql
+incident-service/src/main/resources/db/migration/V2__convert_enums_to_varchar.sql
+auth-service/src/main/resources/db/V2__seed_demo_users.sql
+dispatch-service/src/main/resources/db/migration/V1__create_dispatch_tables.sql
+
+# Frontend env files
+frontend/.env
+frontend/.env.*
+
+# Memory / session files
+memory/
