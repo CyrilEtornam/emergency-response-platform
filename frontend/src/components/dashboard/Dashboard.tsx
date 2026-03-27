@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from 'react';
-import { incidentService } from '../../services/incidentService';
+import { useNavigate } from 'react-router-dom';
+import { incidentService, Incident } from '../../services/incidentService';
 import { userService } from '../../services/userService';
 import './Dashboard.css';
 
@@ -11,12 +12,14 @@ interface DashboardStats {
 }
 
 const Dashboard: React.FC = () => {
+  const navigate = useNavigate();
   const [stats, setStats] = useState<DashboardStats>({
     totalIncidents: 0,
     activeIncidents: 0,
     resolvedIncidents: 0,
     totalUsers: 0
   });
+  const [recentIncidents, setRecentIncidents] = useState<Incident[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
 
   useEffect(() => {
@@ -36,15 +39,14 @@ const Dashboard: React.FC = () => {
           resolvedIncidents,
           totalUsers: users.length
         });
+
+        const sorted = [...incidents].sort(
+          (a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
+        );
+        setRecentIncidents(sorted.slice(0, 5));
       } catch (error) {
         console.error('Failed to load dashboard data:', error);
-        // Fallback to basic stats
-        setStats({
-          totalIncidents: 0,
-          activeIncidents: 0,
-          resolvedIncidents: 0,
-          totalUsers: 0
-        });
+        setStats({ totalIncidents: 0, activeIncidents: 0, resolvedIncidents: 0, totalUsers: 0 });
       } finally {
         setLoading(false);
       }
@@ -86,18 +88,41 @@ const Dashboard: React.FC = () => {
       <div className="dashboard-sections">
         <div className="recent-incidents">
           <h2>Recent Incidents</h2>
-          <div className="incident-list">
-            {/* TODO: Display recent incidents */}
-            <p>No recent incidents to display.</p>
-          </div>
+          {recentIncidents.length === 0 ? (
+            <p>No recent incidents.</p>
+          ) : (
+            <ul className="recent-incident-list">
+              {recentIncidents.map(incident => (
+                <li
+                  key={incident.id}
+                  className="recent-incident-item"
+                  onClick={() => navigate(`/incidents/${incident.id}`)}
+                >
+                  <span className="incident-title">{incident.title}</span>
+                  <span className={`status-badge status-${incident.status.toLowerCase()}`}>
+                    {incident.status}
+                  </span>
+                  <span className="incident-time">
+                    {new Date(incident.createdAt).toLocaleString()}
+                  </span>
+                </li>
+              ))}
+            </ul>
+          )}
         </div>
 
         <div className="quick-actions">
           <h2>Quick Actions</h2>
           <div className="action-buttons">
-            <button className="action-btn primary">Report New Incident</button>
-            <button className="action-btn secondary">View All Incidents</button>
-            <button className="action-btn secondary">Manage Users</button>
+            <button className="action-btn primary" onClick={() => navigate('/incidents')}>
+              Report New Incident
+            </button>
+            <button className="action-btn secondary" onClick={() => navigate('/incidents')}>
+              View All Incidents
+            </button>
+            <button className="action-btn secondary" onClick={() => navigate('/users')}>
+              Manage Users
+            </button>
           </div>
         </div>
       </div>

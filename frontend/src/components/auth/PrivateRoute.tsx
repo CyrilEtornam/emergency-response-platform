@@ -6,6 +6,15 @@ interface PrivateRouteProps {
   requiredRole?: string;
 }
 
+const decodeJwtPayload = (token: string): Record<string, any> | null => {
+  try {
+    const base64 = token.split('.')[1].replace(/-/g, '+').replace(/_/g, '/');
+    return JSON.parse(atob(base64));
+  } catch {
+    return null;
+  }
+};
+
 const PrivateRoute: React.FC<PrivateRouteProps> = ({ children, requiredRole }) => {
   const accessToken = localStorage.getItem('accessToken');
 
@@ -13,8 +22,12 @@ const PrivateRoute: React.FC<PrivateRouteProps> = ({ children, requiredRole }) =
     return <Navigate to="/login" replace />;
   }
 
-  // TODO: Check user role if requiredRole is provided
-  // For now, just check if token exists
+  if (requiredRole) {
+    const payload = decodeJwtPayload(accessToken);
+    if (!payload || payload.role !== requiredRole) {
+      return <Navigate to="/" replace />;
+    }
+  }
 
   return <>{children}</>;
 };

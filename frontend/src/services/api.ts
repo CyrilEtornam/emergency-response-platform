@@ -29,7 +29,7 @@ api.interceptors.response.use(
       const refreshToken = localStorage.getItem('refreshToken');
       if (refreshToken) {
         try {
-          const refreshResponse = await axios.post('/api/auth/refresh', {
+          const refreshResponse = await api.post('/auth/refresh', {
             refreshToken
           });
           const { data } = refreshResponse.data;
@@ -38,7 +38,7 @@ api.interceptors.response.use(
 
           // Retry the original request
           error.config.headers.Authorization = `Bearer ${data.accessToken}`;
-          return axios(error.config);
+          return api(error.config);
         } catch (refreshError) {
           // Refresh failed, redirect to login
           localStorage.removeItem('accessToken');

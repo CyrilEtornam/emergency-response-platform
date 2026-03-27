@@ -29,16 +29,12 @@ const IncidentDetail: React.FC = () => {
   }, [id]);
 
   const handleStatusChange = async (newStatus: string) => {
-    if (!incident) return;
+    if (!incident || !id) return;
 
     setUpdating(true);
     try {
-      // TODO: Update incident status via API
-      setIncident({
-        ...incident,
-        status: newStatus as Incident['status'],
-        updatedAt: new Date().toISOString()
-      });
+      const updated = await incidentService.updateIncident(id, { status: newStatus });
+      setIncident(updated);
     } catch (error) {
       console.error('Failed to update incident status:', error);
     } finally {

@@ -3,10 +3,10 @@ import api from './api';
 export interface User {
   id: string;
   email: string;
-  firstName: string;
-  lastName: string;
+  fullName: string;
+  phone?: string;
   role: string;
-  status: string;
+  active: boolean;
   createdAt: string;
 }
 
@@ -15,7 +15,7 @@ export interface UpdateRoleRequest {
 }
 
 export interface UpdateStatusRequest {
-  status: string;
+  active: boolean;
 }
 
 export const userService = {
@@ -57,16 +57,16 @@ export const userService = {
     }
   },
 
-  async updateUserStatus(id: string, status: string): Promise<User> {
+  async updateUserStatus(id: string, active: boolean): Promise<User> {
     try {
-      const response = await api.patch(`/users/${id}/status`, { status });
+      const response = await api.patch(`/users/${id}/status`, { active });
       return response.data.data;
     } catch (error) {
       console.warn('Backend not available - simulating status update');
       const mockUsers = await this.getMockUsers();
       const user = mockUsers.find(u => u.id === id);
       if (user) {
-        user.status = status as User['status'];
+        user.active = active;
         return user;
       }
       throw error;
@@ -88,37 +88,33 @@ export const userService = {
       {
         id: '1',
         email: 'admin@example.com',
-        firstName: 'John',
-        lastName: 'Admin',
+        fullName: 'John Admin',
         role: 'SUPER_ADMIN',
-        status: 'ACTIVE',
+        active: true,
         createdAt: '2024-01-01T00:00:00Z'
       },
       {
         id: '2',
         email: 'responder@example.com',
-        firstName: 'Jane',
-        lastName: 'Responder',
+        fullName: 'Jane Responder',
         role: 'RESPONDER',
-        status: 'ACTIVE',
+        active: true,
         createdAt: '2024-01-15T00:00:00Z'
       },
       {
         id: '3',
         email: 'viewer@example.com',
-        firstName: 'Bob',
-        lastName: 'Viewer',
+        fullName: 'Bob Viewer',
         role: 'VIEWER',
-        status: 'ACTIVE',
+        active: true,
         createdAt: '2024-02-01T00:00:00Z'
       },
       {
         id: '4',
         email: 'inactive@example.com',
-        firstName: 'Alice',
-        lastName: 'Inactive',
+        fullName: 'Alice Inactive',
         role: 'RESPONDER',
-        status: 'INACTIVE',
+        active: false,
         createdAt: '2024-01-20T00:00:00Z'
       }
     ];

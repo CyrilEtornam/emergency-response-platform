@@ -8,8 +8,9 @@ export interface LoginRequest {
 export interface RegisterRequest {
   email: string;
   password: string;
-  firstName: string;
-  lastName: string;
+  fullName: string;
+  phone?: string;
+  roleName: string;
 }
 
 export interface TokenResponse {
@@ -21,10 +22,10 @@ export interface TokenResponse {
 export interface UserResponse {
   id: string;
   email: string;
-  firstName: string;
-  lastName: string;
+  fullName: string;
+  phone?: string;
   role: string;
-  status: string;
+  active: boolean;
   createdAt: string;
 }
 
@@ -40,7 +41,7 @@ export const authService = {
   },
 
   async logout(refreshToken: string): Promise<void> {
-    await api.post('/auth/logout', { refreshToken });
+    await api.post(`/auth/logout?refreshToken=${encodeURIComponent(refreshToken)}`);
   },
 
   async refreshToken(refreshToken: string): Promise<TokenResponse> {

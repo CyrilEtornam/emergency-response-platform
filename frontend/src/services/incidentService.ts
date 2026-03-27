@@ -114,11 +114,3 @@ export const incidentService = {
     ];
   }
 };
-    const response = await api.put(`/incidents/${id}`, updates);
-    return response.data.data;
-  },
-
-  async deleteIncident(id: string): Promise<void> {
-    await api.delete(`/incidents/${id}`);
-  }
-};
