@@ -12,6 +12,7 @@ import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.Map;
 import java.util.UUID;
 
 @RestController
@@ -45,6 +46,14 @@ public class IncidentController {
             @PathVariable UUID id,
             @Valid @RequestBody IncidentRequest req) {
         return ResponseEntity.ok(service.update(id, req));
+    }
+
+    @PatchMapping("/{id}/assign")
+    public ResponseEntity<IncidentResponse> assign(
+            @PathVariable UUID id,
+            @RequestBody(required = false) Map<String, String> body) {
+        String vehicleId = body != null ? body.get("vehicleId") : null;
+        return ResponseEntity.ok(service.assign(id, vehicleId));
     }
 
     @PatchMapping("/{id}/resolve")

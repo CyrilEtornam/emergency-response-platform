@@ -33,3 +33,8 @@ export async function getResponders(params = {}) {
   const res = await incidentAxios.get('/responders', { params });
   return unwrap(res);
 }
+
+export async function assignVehicle(incidentId, vehicleId) {
+  const res = await incidentAxios.patch(`/incidents/${incidentId}/assign`, { vehicleId });
+  return unwrap(res);
+}

@@ -4,11 +4,18 @@ import { Badge } from '../../components/common/Badge';
 import { Button } from '../../components/common/Button';
 import { Spinner } from '../../components/common/Spinner';
 import { EmptyState } from '../../components/common/EmptyState';
-import { SEVERITY_COLORS } from '../../utils/constants';
-import { formatTimeAgo, formatDate } from '../../utils/formatters';
+import { SEVERITY_COLORS, SEVERITY_LEVELS, INCIDENT_STATUSES } from '../../utils/constants';
+import { formatTimeAgo, formatDate, getLocationLabel } from '../../utils/formatters';
+import { assignVehicle } from '../../api/incidentApi';
+import logger from '../../utils/logger';
+
+// Shared select style to keep filter dropdowns consistent
+const selectCls =
+  'bg-[#0F172A] border border-[#334155] text-[#F1F5F9] text-xs rounded px-2 py-1.5 focus:outline-none focus:ring-1 focus:ring-[#3B82F6] cursor-pointer';
 
 function IncidentCard({ incident, isSelected, onClick }) {
   const severityStyle = SEVERITY_COLORS[incident.severity] || SEVERITY_COLORS.LOW;
+  const location = incident.address || getLocationLabel(incident.latitude, incident.longitude);
 
   return (
     <div
@@ -27,30 +34,109 @@ function IncidentCard({ incident, isSelected, onClick }) {
         </div>
         <Badge variant="status" value={incident.status} />
       </div>
-      <p className="text-sm text-[#F1F5F9] font-medium truncate mb-0.5">
-        {incident.address || `${incident.latitude?.toFixed(4)}, ${incident.longitude?.toFixed(4)}`}
-      </p>
+      <p className="text-sm text-[#F1F5F9] font-medium truncate mb-0.5">{location}</p>
       <p className="text-xs text-[#94A3B8] truncate">{incident.description}</p>
       <p className="text-xs text-[#94A3B8] mt-1">{formatTimeAgo(incident.createdAt || incident.reportedAt)}</p>
     </div>
   );
 }
 
-function IncidentDetail({ incident, onViewOnMap }) {
+function AssignVehiclePanel({ incident, vehicles, onAssigned, onCancel }) {
+  const available = vehicles.filter((v) => v.status === 'AVAILABLE');
+  const [busy, setBusy] = useState(false);
+  const [err, setErr] = useState(null);
+
+  async function handleAssign(vehicle) {
+    setBusy(true);
+    setErr(null);
+    try {
+      await assignVehicle(incident.id, vehicle.id);
+      onAssigned();
+    } catch (e) {
+      logger.warn('assignVehicle failed', e);
+      setErr(e?.message || 'Assignment failed. Please try again.');
+      setBusy(false);
+    }
+  }
+
+  return (
+    <div className="mt-3 border border-[#334155] rounded bg-[#0F172A]">
+      <div className="flex items-center justify-between px-3 py-2 border-b border-[#334155]">
+        <span className="text-xs font-semibold text-[#F1F5F9]">Select Available Vehicle</span>
+        <button
+          onClick={onCancel}
+          className="text-[#94A3B8] hover:text-[#F1F5F9] text-xs"
+        >
+          Cancel
+        </button>
+      </div>
+
+      {available.length === 0 ? (
+        <p className="px-3 py-3 text-xs text-[#94A3B8]">No available vehicles at this time.</p>
+      ) : (
+        <div className="divide-y divide-[#1E293B]">
+          {available.map((v) => (
+            <div key={v.id} className="flex items-center justify-between px-3 py-2">
+              <div>
+                <p className="text-xs font-medium text-[#F1F5F9]">
+                  {v.registrationNumber || v.plateNumber || v.id?.slice(0, 8)}
+                </p>
+                <p className="text-xs text-[#94A3B8]">{v.driverName || v.driver || 'Unassigned'}</p>
+              </div>
+              <Button
+                size="sm"
+                variant="primary"
+                disabled={busy}
+                onClick={() => handleAssign(v)}
+              >
+                {busy ? <Spinner size="sm" /> : 'Assign'}
+              </Button>
+            </div>
+          ))}
+        </div>
+      )}
+
+      {err && (
+        <p className="px-3 pb-2 text-xs text-[#F87171]">{err}</p>
+      )}
+    </div>
+  );
+}
+
+function IncidentDetail({ incident, vehicles, onViewOnMap, onAssign }) {
+  const [showAssign, setShowAssign] = useState(false);
+  const location = incident.address || getLocationLabel(incident.latitude, incident.longitude);
+
+  function handleAssigned() {
+    setShowAssign(false);
+    onAssign?.();
+  }
+
   return (
     <div className="px-4 py-4 bg-[#0F172A] border-t-2 border-[#3B82F6]">
       <div className="flex items-center justify-between mb-3">
         <h4 className="text-sm font-semibold text-[#F1F5F9]">Incident Detail</h4>
-        <Button size="sm" variant="secondary" onClick={onViewOnMap}>
-          View on Map
-        </Button>
+        <div className="flex items-center gap-2">
+          {incident.status !== 'RESOLVED' && (
+            <Button
+              size="sm"
+              variant="primary"
+              onClick={() => setShowAssign((v) => !v)}
+            >
+              {showAssign ? 'Cancel' : 'Assign Vehicle'}
+            </Button>
+          )}
+          <Button size="sm" variant="secondary" onClick={onViewOnMap}>
+            View on Map
+          </Button>
+        </div>
       </div>
 
       <div className="space-y-2 text-sm">
-        <Row label="Type" value={<Badge variant="agency" value={incident.type} />} />
+        <Row label="Type"     value={<Badge variant="agency" value={incident.type} />} />
         <Row label="Severity" value={<Badge variant="severity" value={incident.severity} />} />
-        <Row label="Status" value={<Badge variant="status" value={incident.status} />} />
-        <Row label="Location" value={incident.address || `${incident.latitude}, ${incident.longitude}`} />
+        <Row label="Status"   value={<Badge variant="status" value={incident.status} />} />
+        <Row label="Location" value={location} />
         <Row label="Reported" value={formatDate(incident.createdAt || incident.reportedAt)} />
         {incident.description && (
           <Row label="Description" value={incident.description} />
@@ -62,6 +148,15 @@ function IncidentDetail({ incident, onViewOnMap }) {
           <Row label="Vehicle" value={incident.vehicleId} />
         )}
       </div>
+
+      {showAssign && (
+        <AssignVehiclePanel
+          incident={incident}
+          vehicles={vehicles}
+          onAssigned={handleAssigned}
+          onCancel={() => setShowAssign(false)}
+        />
+      )}
 
       {incident.timeline && incident.timeline.length > 0 && (
         <div className="mt-4">
@@ -89,9 +184,26 @@ function Row({ label, value }) {
   );
 }
 
-export function IncidentsTab({ incidents, loading, error, onRefresh, selectedId, onSelect }) {
+export function IncidentsTab({ incidents, loading, error, onRefresh, selectedId, onSelect, vehicles = [] }) {
   const [detailId, setDetailId] = useState(null);
-  const detailIncident = incidents.find((i) => i.id === detailId);
+  const [search, setSearch]     = useState('');
+  const [severity, setSeverity] = useState('ALL');
+  const [status, setStatus]     = useState('ALL');
+
+  const filtered = incidents.filter((inc) => {
+    if (severity !== 'ALL' && inc.severity !== severity) return false;
+    if (status   !== 'ALL' && inc.status   !== status)   return false;
+    if (search) {
+      const q = search.toLowerCase();
+      const inDescription = inc.description?.toLowerCase().includes(q);
+      const inAddress     = inc.address?.toLowerCase().includes(q);
+      const inLocation    = getLocationLabel(inc.latitude, inc.longitude)?.toLowerCase().includes(q);
+      if (!inDescription && !inAddress && !inLocation) return false;
+    }
+    return true;
+  });
+
+  const detailIncident = filtered.find((i) => i.id === detailId);
 
   const handleClick = (incident) => {
     setDetailId((prev) => (prev === incident.id ? null : incident.id));
@@ -106,7 +218,7 @@ export function IncidentsTab({ incidents, loading, error, onRefresh, selectedId,
           <h3 className="text-sm font-semibold text-[#F1F5F9]">Active Incidents</h3>
           {!loading && (
             <span className="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-[#1E293B] text-[#94A3B8]">
-              {incidents.length}
+              {filtered.length}
             </span>
           )}
         </div>
@@ -114,6 +226,31 @@ export function IncidentsTab({ incidents, loading, error, onRefresh, selectedId,
           {loading ? <Spinner size="sm" /> : 'Refresh'}
         </Button>
       </div>
+
+      {/* Filter bar */}
+      {!loading && !error && (
+        <div className="px-3 py-2 border-b border-[#334155] flex gap-2 flex-wrap items-center shrink-0 bg-[#0F172A]">
+          <input
+            type="text"
+            value={search}
+            onChange={(e) => setSearch(e.target.value)}
+            placeholder="Search description or location…"
+            className="flex-1 min-w-0 bg-[#1E293B] border border-[#334155] text-[#F1F5F9] text-xs rounded px-2 py-1.5 placeholder:text-[#475569] focus:outline-none focus:ring-1 focus:ring-[#3B82F6]"
+          />
+          <select value={severity} onChange={(e) => setSeverity(e.target.value)} className={selectCls}>
+            <option value="ALL">All Severities</option>
+            {SEVERITY_LEVELS.map((s) => (
+              <option key={s} value={s}>{s}</option>
+            ))}
+          </select>
+          <select value={status} onChange={(e) => setStatus(e.target.value)} className={selectCls}>
+            <option value="ALL">All Statuses</option>
+            {INCIDENT_STATUSES.map((s) => (
+              <option key={s} value={s}>{s}</option>
+            ))}
+          </select>
+        </div>
+      )}
 
       {/* Content */}
       {loading ? (
@@ -125,31 +262,35 @@ export function IncidentsTab({ incidents, loading, error, onRefresh, selectedId,
           <p className="text-sm text-[#F87171] mb-3">{error}</p>
           <Button size="sm" variant="secondary" onClick={onRefresh}>Retry</Button>
         </div>
-      ) : incidents.length === 0 ? (
+      ) : filtered.length === 0 ? (
         <EmptyState
-          title="No active incidents"
-          description="New incidents will appear here automatically."
+          title={incidents.length === 0 ? 'No active incidents' : 'No matches'}
+          description={
+            incidents.length === 0
+              ? 'New incidents will appear here automatically.'
+              : 'Try adjusting your filters.'
+          }
         />
       ) : (
-        <>
-          <div>
-            {incidents.map((inc) => (
-              <React.Fragment key={inc.id}>
-                <IncidentCard
-                  incident={inc}
-                  isSelected={inc.id === selectedId || inc.id === detailId}
-                  onClick={handleClick}
+        <div>
+          {filtered.map((inc) => (
+            <React.Fragment key={inc.id}>
+              <IncidentCard
+                incident={inc}
+                isSelected={inc.id === selectedId || inc.id === detailId}
+                onClick={handleClick}
+              />
+              {detailIncident && detailIncident.id === inc.id && (
+                <IncidentDetail
+                  incident={detailIncident}
+                  vehicles={vehicles}
+                  onViewOnMap={() => onSelect?.(detailIncident)}
+                  onAssign={onRefresh}
                 />
-                {detailIncident && detailIncident.id === inc.id && (
-                  <IncidentDetail
-                    incident={detailIncident}
-                    onViewOnMap={() => onSelect?.(detailIncident)}
-                  />
-                )}
-              </React.Fragment>
-            ))}
-          </div>
-        </>
+              )}
+            </React.Fragment>
+          ))}
+        </div>
       )}
     </div>
   );

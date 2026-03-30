@@ -17,6 +17,7 @@ public class IncidentResponse {
     private Double latitude;
     private Double longitude;
     private String address;
+    private String vehicleId;
     private String reportedBy;
     private Instant createdAt;
     private Instant updatedAt;
@@ -31,6 +32,7 @@ public class IncidentResponse {
                 .latitude(i.getLatitude())
                 .longitude(i.getLongitude())
                 .address(i.getAddress())
+                .vehicleId(i.getVehicleId())
                 .reportedBy(i.getReportedBy())
                 .createdAt(i.getCreatedAt())
                 .updatedAt(i.getUpdatedAt())

@@ -58,6 +58,14 @@ public class IncidentService {
         return IncidentResponse.from(repo.save(incident));
     }
 
+    public IncidentResponse assign(UUID id, String vehicleId) {
+        Incident incident = repo.findById(id)
+                .orElseThrow(() -> new RuntimeException("Incident not found: " + id));
+        incident.setStatus(Incident.IncidentStatus.ASSIGNED);
+        incident.setVehicleId(vehicleId);
+        return IncidentResponse.from(repo.save(incident));
+    }
+
     public IncidentResponse resolve(UUID id) {
         Incident incident = repo.findById(id)
                 .orElseThrow(() -> new RuntimeException("Incident not found: " + id));

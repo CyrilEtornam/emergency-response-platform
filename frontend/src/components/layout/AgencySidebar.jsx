@@ -71,6 +71,7 @@ export function AgencySidebar({
             onRefresh={onRefreshIncidents}
             selectedId={selectedIncidentId}
             onSelect={onIncidentSelect}
+            vehicles={vehicles}
           />
         )}
         {activeTab === 'dispatch' && (

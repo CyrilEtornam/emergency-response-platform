@@ -100,3 +100,32 @@ export function capitalise(str) {
   if (!str) return '';
   return str.charAt(0).toUpperCase() + str.slice(1).toLowerCase();
 }
+
+const GHANA_LOCATIONS = [
+  { name: 'Accra',      minLat: 5.45,  maxLat: 5.75,  minLng: -0.35, maxLng:  0.05 },
+  { name: 'Tema',       minLat: 5.60,  maxLat: 5.75,  minLng: -0.05, maxLng:  0.10 },
+  { name: 'Kumasi',     minLat: 6.55,  maxLat: 6.80,  minLng: -1.70, maxLng: -1.50 },
+  { name: 'Tamale',     minLat: 9.35,  maxLat: 9.50,  minLng: -0.90, maxLng: -0.80 },
+  { name: 'Cape Coast', minLat: 5.05,  maxLat: 5.20,  minLng: -1.30, maxLng: -1.10 },
+  { name: 'Takoradi',   minLat: 4.85,  maxLat: 5.00,  minLng: -1.85, maxLng: -1.70 },
+  { name: 'Sunyani',    minLat: 7.30,  maxLat: 7.45,  minLng: -2.40, maxLng: -2.25 },
+  { name: 'Ho',         minLat: 6.55,  maxLat: 6.70,  minLng:  0.40, maxLng:  0.55 },
+  { name: 'Koforidua',  minLat: 6.05,  maxLat: 6.15,  minLng: -0.30, maxLng: -0.20 },
+  { name: 'Wa',         minLat: 9.95,  maxLat: 10.10, minLng: -2.65, maxLng: -2.45 },
+  { name: 'Bolgatanga', minLat: 10.75, maxLat: 10.85, minLng: -0.95, maxLng: -0.75 },
+];
+
+/**
+ * Returns a human-readable location label for Ghana coordinates.
+ * Returns "around {City}" if within a known city bounding box,
+ * otherwise falls back to "lat, lng" decimals.
+ */
+export function getLocationLabel(lat, lng) {
+  if (lat == null || lng == null) return null;
+  const n = Number(lat);
+  const e = Number(lng);
+  const match = GHANA_LOCATIONS.find(
+    (l) => n >= l.minLat && n <= l.maxLat && e >= l.minLng && e <= l.maxLng
+  );
+  return match ? `around ${match.name}` : `${n.toFixed(4)}, ${e.toFixed(4)}`;
+}

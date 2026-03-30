@@ -42,6 +42,9 @@ public class Incident {
     @Column(length = 512)
     private String address;
 
+    @Column(name = "vehicle_id")
+    private String vehicleId;
+
     @Column(name = "reported_by")
     private String reportedBy;
 
