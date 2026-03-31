@@ -5,6 +5,7 @@ import com.erp.dispatch_service.model.Dispatch;
 import com.erp.dispatch_service.model.Vehicle;
 import com.erp.dispatch_service.repository.DispatchRepository;
 import com.erp.dispatch_service.repository.VehicleRepository;
+import com.erp.dispatch_service.service.SimulationService;
 import com.erp.dispatch_service.websocket.VehicleTrackingHandler;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
@@ -27,6 +28,7 @@ public class DispatchAssignmentListener {
     private final VehicleRepository vehicleRepository;
     private final DispatchRepository dispatchRepository;
     private final VehicleTrackingHandler trackingHandler;
+    private final SimulationService simulationService;
 
     @RabbitListener(queues = "${rabbitmq.dispatch-queue:dispatch.incident.queue}")
     @Transactional
@@ -45,6 +47,16 @@ public class DispatchAssignmentListener {
                     .orElseThrow(() -> new IllegalStateException("Vehicle not found " + vehicleId));
             vehicle.setStatus(Vehicle.VehicleStatus.EN_ROUTE);
             vehicleRepository.save(vehicle);
+
+            // Register movement simulation toward the incident location
+            Double destLat = payload.getIncidentLatitude();
+            Double destLng = payload.getIncidentLongitude();
+            if (destLat != null && destLng != null) {
+                double startLat = vehicle.getLatitude() != null ? vehicle.getLatitude() : 5.55;
+                double startLng = vehicle.getLongitude() != null ? vehicle.getLongitude() : -0.20;
+                simulationService.register(vehicleId, startLat, startLng, destLat, destLng);
+                log.info("Simulation registered: vehicle {} → ({}, {})", vehicleId, destLat, destLng);
+            }
 
             upsertDispatch(dispatchId, incidentId, vehicleId);
             broadcastAssignment(vehicle, incidentId);

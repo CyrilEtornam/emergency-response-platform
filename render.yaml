@@ -1,0 +1,132 @@
+databases:
+  - name: erp-postgres
+    databaseName: auth_db
+    user: erp_user
+    plan: free
+    ipAllowList: []
+
+envVarGroups:
+  - name: erp-shared
+    envVars:
+      - key: JWT_SECRET
+        generateValue: true
+      - key: RABBITMQ_HOST
+        sync: false
+      - key: RABBITMQ_PORT
+        value: "5672"
+      - key: RABBITMQ_USERNAME
+        sync: false
+      - key: RABBITMQ_PASSWORD
+        sync: false
+
+services:
+
+  - type: web
+    name: auth-service
+    runtime: docker
+    rootDir: auth-service
+    plan: free
+    envVars:
+      - fromGroup: erp-shared
+      - key: DB_HOST
+        fromDatabase:
+          name: erp-postgres
+          property: host
+      - key: DB_PORT
+        fromDatabase:
+          name: erp-postgres
+          property: port
+      - key: DB_USERNAME
+        fromDatabase:
+          name: erp-postgres
+          property: user
+      - key: DB_PASSWORD
+        fromDatabase:
+          name: erp-postgres
+          property: password
+      - key: DB_NAME
+        value: auth_db
+      - key: REDIS_HOST
+        sync: false
+      - key: REDIS_PORT
+        sync: false
+      - key: REDIS_PASSWORD
+        sync: false
+
+  - type: web
+    name: incident-service
+    runtime: docker
+    rootDir: incident-service
+    plan: free
+    envVars:
+      - fromGroup: erp-shared
+      - key: DB_HOST
+        fromDatabase:
+          name: erp-postgres
+          property: host
+      - key: DB_PORT
+        fromDatabase:
+          name: erp-postgres
+          property: port
+      - key: DB_USERNAME
+        fromDatabase:
+          name: erp-postgres
+          property: user
+      - key: DB_PASSWORD
+        fromDatabase:
+          name: erp-postgres
+          property: password
+      - key: DB_NAME
+        value: incident_db
+
+  - type: web
+    name: dispatch-service
+    runtime: docker
+    rootDir: dispatch-service
+    plan: free
+    envVars:
+      - fromGroup: erp-shared
+      - key: DB_HOST
+        fromDatabase:
+          name: erp-postgres
+          property: host
+      - key: DB_PORT
+        fromDatabase:
+          name: erp-postgres
+          property: port
+      - key: DB_USERNAME
+        fromDatabase:
+          name: erp-postgres
+          property: user
+      - key: DB_PASSWORD
+        fromDatabase:
+          name: erp-postgres
+          property: password
+      - key: DB_NAME
+        value: dispatch_db
+
+  - type: web
+    name: analytics-service
+    runtime: docker
+    rootDir: analytics-service
+    plan: free
+    envVars:
+      - fromGroup: erp-shared
+      - key: DB_HOST
+        fromDatabase:
+          name: erp-postgres
+          property: host
+      - key: DB_PORT
+        fromDatabase:
+          name: erp-postgres
+          property: port
+      - key: DB_USERNAME
+        fromDatabase:
+          name: erp-postgres
+          property: user
+      - key: DB_PASSWORD
+        fromDatabase:
+          name: erp-postgres
+          property: password
+      - key: DB_NAME
+        value: incident_db

@@ -1,7 +1,9 @@
 package com.erp.dispatch_service.websocket;
 
 import com.erp.dispatch_service.model.Vehicle;
+import com.erp.dispatch_service.repository.VehicleRepository;
 import com.erp.dispatch_service.security.JwtUtil;
+import com.erp.dispatch_service.service.SimulationService;
 import com.erp.dispatch_service.service.VehicleService;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
@@ -19,8 +21,8 @@ import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Random;
 import java.util.Set;
+import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
 
 @Component
@@ -28,11 +30,12 @@ import java.util.concurrent.ConcurrentHashMap;
 public class VehicleTrackingHandler extends TextWebSocketHandler {
 
     private static final Logger log = LoggerFactory.getLogger(VehicleTrackingHandler.class);
-    private static final Random RANDOM = new Random();
 
     private final Set<WebSocketSession> sessions = ConcurrentHashMap.newKeySet();
     private final JwtUtil jwtUtil;
     private final VehicleService vehicleService;
+    private final VehicleRepository vehicleRepository;
+    private final SimulationService simulationService;
     private final ObjectMapper objectMapper;
 
     @Override
@@ -93,10 +96,21 @@ public class VehicleTrackingHandler extends TextWebSocketHandler {
     private void broadcastLocationUpdate(Vehicle vehicle) {
         double lat = vehicle.getLatitude() != null ? vehicle.getLatitude() : 5.55;
         double lon = vehicle.getLongitude() != null ? vehicle.getLongitude() : -0.20;
-        if (vehicle.getStatus() == Vehicle.VehicleStatus.EN_ROUTE
-                || vehicle.getStatus() == Vehicle.VehicleStatus.ON_SCENE) {
-            lat += (RANDOM.nextDouble() - 0.5) * 0.002;
-            lon += (RANDOM.nextDouble() - 0.5) * 0.002;
+
+        if (vehicle.getStatus() == Vehicle.VehicleStatus.EN_ROUTE) {
+            UUID id = vehicle.getId();
+            if (simulationService.isActive(id)) {
+                if (simulationService.hasArrived(id)) {
+                    simulationService.clear(id);
+                    vehicle.setStatus(Vehicle.VehicleStatus.ON_SCENE);
+                    vehicleRepository.save(vehicle);
+                    log.info("Vehicle {} arrived ON_SCENE (simulation complete)", id);
+                } else {
+                    double[] pos = simulationService.tick(id);
+                    lat = pos[0];
+                    lon = pos[1];
+                }
+            }
         }
 
         Map<String, Object> event = new LinkedHashMap<>();
