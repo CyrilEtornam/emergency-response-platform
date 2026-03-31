@@ -129,4 +129,4 @@ services:
           name: erp-postgres
           property: password
       - key: DB_NAME
-        value: incident_db
+        value: auth_db

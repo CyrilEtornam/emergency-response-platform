@@ -23,7 +23,7 @@ spring:
   flyway:
     enabled: true
     locations: classpath:db
-    baseline-on-migrate: true
+
 
   data:
     redis:
