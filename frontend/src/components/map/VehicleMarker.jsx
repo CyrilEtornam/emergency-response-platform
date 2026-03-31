@@ -18,10 +18,25 @@ export function VehicleMarker({ vehicle, onClick, isSelected }) {
     anchor: window.google ? new window.google.maps.Point(16, 16) : undefined,
   };
 
+  if (label && window.google) {
+    icon.labelOrigin = new window.google.maps.Point(16, 0);
+  }
+
+  const label =
+    vehicle.status === 'EN_ROUTE'
+      ? {
+          text: '➤',
+          color: '#e8622a',
+          fontSize: '14px',
+          fontWeight: '700',
+        }
+      : undefined;
+
   return (
     <Marker
       position={position}
       icon={icon}
+      label={label}
       onClick={() => onClick?.(vehicle)}
       zIndex={isSelected ? 10 : 2}
       options={{

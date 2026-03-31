@@ -30,52 +30,69 @@ const MAP_OPTIONS = {
   ],
   restriction: {
     latLngBounds: {
-      north: 11.5,
+      north: 11.2,
       south: 4.5,
       west: -3.5,
-      east: 1.5,
+      east: 1.2,
     },
-    strictBounds: false,
+    strictBounds: true,
   },
-  minZoom: 6,
+  minZoom: 6.5,
+  maxZoom: 18,
 };
 
 const containerStyle = { width: '100%', height: '100%' };
 
+// Ghana's more accurate border coordinates
 const GHANA_BORDER = [
-  { lat: 11.1748, lng: -0.0896 },
-  { lat: 11.0078, lng:  0.9006 },
-  { lat: 10.7365, lng:  1.0432 },
-  { lat: 10.2366, lng:  0.8842 },
-  { lat:  9.5201, lng:  0.3679 },
-  { lat:  9.4054, lng:  0.5648 },
-  { lat:  8.7771, lng:  0.6361 },
-  { lat:  8.4594, lng:  0.4836 },
-  { lat:  8.0996, lng:  0.1785 },
-  { lat:  7.8232, lng:  0.5233 },
-  { lat:  7.4225, lng:  0.5701 },
-  { lat:  6.9594, lng:  1.1932 },
-  { lat:  6.1401, lng:  1.1932 },
-  { lat:  5.3437, lng:  0.5701 },
-  { lat:  4.9950, lng: -0.0896 },
-  { lat:  4.7385, lng: -1.0603 },
-  { lat:  4.9950, lng: -2.0310 },
-  { lat:  5.3437, lng: -2.7969 },
-  { lat:  6.1401, lng: -3.2617 },
-  { lat:  7.4225, lng: -3.2178 },
-  { lat:  8.4594, lng: -2.7090 },
-  { lat:  9.4054, lng: -2.7090 },
-  { lat: 10.2366, lng: -2.5122 },
-  { lat: 10.9070, lng: -2.7090 },
-  { lat: 11.1748, lng: -0.0896 },
+  // Eastern border (Togo/Benin)
+  { lat: 11.1667, lng: 0.0000 },
+  { lat: 11.0000, lng: 0.8000 },
+  { lat: 10.7500, lng: 1.0000 },
+  { lat: 10.3000, lng: 0.9500 },
+  { lat: 9.9000, lng: 0.8500 },
+  { lat: 9.5000, lng: 0.7000 },
+  { lat: 9.2000, lng: 0.5500 },
+  { lat: 8.8000, lng: 0.6500 },
+  { lat: 8.5000, lng: 0.5000 },
+  { lat: 8.2000, lng: 0.3500 },
+  { lat: 8.0000, lng: 0.2000 },
+  { lat: 7.5000, lng: 0.5500 },
+  { lat: 7.0000, lng: 1.0000 },
+  { lat: 6.5000, lng: 1.2000 },
+  { lat: 6.0000, lng: 1.1000 },
+  { lat: 5.5000, lng: 0.8000 },
+  // Southern border (Gulf of Guinea)
+  { lat: 5.0000, lng: 0.2000 },
+  { lat: 4.7500, lng: -0.5000 },
+  { lat: 4.7000, lng: -1.2000 },
+  { lat: 4.7500, lng: -1.8000 },
+  // Western border (Côte d'Ivoire)
+  { lat: 5.0000, lng: -2.5000 },
+  { lat: 5.5000, lng: -3.0000 },
+  { lat: 6.0000, lng: -3.2500 },
+  { lat: 6.5000, lng: -3.2000 },
+  { lat: 7.0000, lng: -3.2500 },
+  { lat: 7.5000, lng: -3.0000 },
+  { lat: 8.0000, lng: -2.9000 },
+  { lat: 8.5000, lng: -2.8000 },
+  { lat: 9.0000, lng: -2.8000 },
+  { lat: 9.5000, lng: -2.7500 },
+  // Northern border (Burkina Faso)
+  { lat: 10.0000, lng: -2.6000 },
+  { lat: 10.5000, lng: -2.7000 },
+  { lat: 11.0000, lng: -2.5000 },
+  { lat: 11.1667, lng: -1.5000 },
+  { lat: 11.1667, lng: -0.5000 },
+  { lat: 11.1667, lng: 0.0000 },
 ];
 
 const GHANA_POLYGON_OPTIONS = {
-  strokeColor: '#60A5FA',
-  strokeOpacity: 0.9,
-  strokeWeight: 2.5,
-  fillColor: '#60A5FA',
-  fillOpacity: 0.04,
+  strokeColor: '#3B82F6',
+  strokeOpacity: 1.0,
+  strokeWeight: 3,
+  fillColor: '#1E40AF',
+  fillOpacity: 0.06,
   clickable: false,
   zIndex: 1,
 };
@@ -175,7 +192,7 @@ export function MapPanel({
           <StandaloneSearchBox
             onLoad={(ref) => (searchBoxRef.current = ref)}
             onPlacesChanged={handlePlacesChanged}
-            bounds={{ north: 11.5, south: 4.5, west: -3.5, east: 1.5 }}
+            bounds={{ north: 11.2, south: 4.5, west: -3.5, east: 1.2 }}
           >
             <input
               type="text"

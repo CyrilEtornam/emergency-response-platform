@@ -33,7 +33,22 @@ export function AgencyShell() {
 
   // WebSocket for live vehicle positions
   const handleWsMessage = useCallback((data) => {
-    updateVehicle(data);
+    if (!data?.eventType) return;
+    if (data.eventType === 'location.updated') {
+      updateVehicle({
+        vehicleId: data.vehicleId,
+        location: data.location,
+        status: data.status,
+        callSign: data.callSign,
+        vehicleType: data.vehicleType,
+      });
+    } else if (data.eventType === 'dispatch.assigned') {
+      updateVehicle({
+        vehicleId: data.vehicleId,
+        status: data.status || 'EN_ROUTE',
+        incidentId: data.incidentId,
+      });
+    }
   }, [updateVehicle]);
 
   const { isMaxRetriesReached } = useWebSocket(

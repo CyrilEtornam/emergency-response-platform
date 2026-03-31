@@ -46,13 +46,23 @@ public class AnalyticsController {
         return ResponseEntity.ok(service.getCrossAgency());
     }
 
+    @GetMapping("/response-times")
+    public ResponseEntity<Map<String, Object>> responseTimes(
+            @RequestParam(required = false) String agency) {
+        return ResponseEntity.ok(service.getResponseTimes(agency));
+    }
+
     @GetMapping("/incidents")
     public ResponseEntity<List<Map<String, Object>>> incidents(
+            @RequestParam(required = false) String type,
+            @RequestParam(required = false) String region,
+            @RequestParam(required = false) String dateFrom,
+            @RequestParam(required = false) String dateTo,
             @RequestParam(required = false) String agency,
             @RequestParam(required = false) String status,
             @RequestParam(required = false) String severity,
             @RequestParam(defaultValue = "50") int limit) {
-        return ResponseEntity.ok(service.getIncidents(agency, status, severity, limit));
+        return ResponseEntity.ok(service.getIncidents(type, region, dateFrom, dateTo, agency, status, severity, limit));
     }
 
     @GetMapping("/incidents/by-region")

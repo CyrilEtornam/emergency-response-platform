@@ -2,7 +2,9 @@ package com.erp.incident_service.controller;
 
 import com.erp.incident_service.dto.IncidentRequest;
 import com.erp.incident_service.dto.IncidentResponse;
+import com.erp.incident_service.dto.ResponderWithDistanceDTO;
 import com.erp.incident_service.service.IncidentService;
+import com.erp.incident_service.service.ResponderService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
@@ -21,6 +23,7 @@ import java.util.UUID;
 public class IncidentController {
 
     private final IncidentService service;
+    private final ResponderService responderService;
 
     @GetMapping
     public ResponseEntity<List<IncidentResponse>> list(
@@ -59,5 +62,15 @@ public class IncidentController {
     @PatchMapping("/{id}/resolve")
     public ResponseEntity<IncidentResponse> resolve(@PathVariable UUID id) {
         return ResponseEntity.ok(service.resolve(id));
+    }
+
+    /**
+     * GET /incidents/:id/suggested-responders
+     * Returns top 3 nearest available responders for the incident
+     * Response: [{ id, name, type, latitude, longitude, availability, distanceKm }]
+     */
+    @GetMapping("/{id}/suggested-responders")
+    public ResponseEntity<List<ResponderWithDistanceDTO>> getSuggestedResponders(@PathVariable UUID id) {
+        return ResponseEntity.ok(responderService.getSuggestedResponders(id, 3));
     }
 }

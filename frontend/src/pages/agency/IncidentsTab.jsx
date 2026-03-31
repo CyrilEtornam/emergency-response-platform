@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import clsx from 'clsx';
 import { Badge } from '../../components/common/Badge';
 import { Button } from '../../components/common/Button';
@@ -6,7 +6,7 @@ import { Spinner } from '../../components/common/Spinner';
 import { EmptyState } from '../../components/common/EmptyState';
 import { SEVERITY_COLORS, SEVERITY_LEVELS, INCIDENT_STATUSES } from '../../utils/constants';
 import { formatTimeAgo, formatDate, getLocationLabel } from '../../utils/formatters';
-import { assignVehicle } from '../../api/incidentApi';
+import { assignVehicle, getSuggestedResponders, assignResponder } from '../../api/incidentApi';
 import logger from '../../utils/logger';
 
 // Shared select style to keep filter dropdowns consistent
@@ -105,12 +105,41 @@ function AssignVehiclePanel({ incident, vehicles, onAssigned, onCancel }) {
 
 function IncidentDetail({ incident, vehicles, onViewOnMap, onAssign }) {
   const [showAssign, setShowAssign] = useState(false);
+  const [suggested, setSuggested] = useState([]);
+  const [loadingSuggested, setLoadingSuggested] = useState(false);
   const location = incident.address || getLocationLabel(incident.latitude, incident.longitude);
+
+  // Fetch suggested responders when incident detail opens
+  useEffect(() => {
+    if (incident && incident.status !== 'RESOLVED') {
+      setLoadingSuggested(true);
+      getSuggestedResponders(incident.id)
+        .then((data) => {
+          setSuggested(data || []);
+        })
+        .catch((err) => {
+          logger.warn('Failed to fetch suggested responders', err);
+          setSuggested([]);
+        })
+        .finally(() => setLoadingSuggested(false));
+    }
+  }, [incident?.id]);
+
+  async function handleAssignSuggested(responder) {
+    try {
+      await assignResponder(responder.id, incident.id, true);
+      onAssign?.();
+    } catch (err) {
+      logger.error('Failed to assign suggested responder', err);
+    }
+  }
 
   function handleAssigned() {
     setShowAssign(false);
     onAssign?.();
   }
+
+  const topSuggestion = suggested.length > 0 ? suggested[0] : null;
 
   return (
     <div className="px-4 py-4 bg-[#0F172A] border-t-2 border-[#3B82F6]">
@@ -148,6 +177,40 @@ function IncidentDetail({ incident, vehicles, onViewOnMap, onAssign }) {
           <Row label="Vehicle" value={incident.vehicleId} />
         )}
       </div>
+
+      {/* Suggested Responder Section */}
+      {!showAssign && incident.status !== 'RESOLVED' && !incident.vehicleId && (
+        <div className="mt-4 p-3 border border-[#334155] rounded bg-[#1E293B]">
+          <p className="text-xs font-medium uppercase tracking-widest text-[#94A3B8] mb-2">
+            Nearest Available
+          </p>
+          {loadingSuggested ? (
+            <div className="flex items-center gap-2 text-xs text-[#94A3B8]">
+              <Spinner size="sm" />
+              <span>Finding nearest responders...</span>
+            </div>
+          ) : topSuggestion ? (
+            <div className="flex items-center justify-between">
+              <div className="flex-1">
+                <p className="text-sm font-medium text-[#F1F5F9]">{topSuggestion.name}</p>
+                <div className="flex items-center gap-2 mt-1">
+                  <Badge variant="agency" value={topSuggestion.type} />
+                  <span className="text-xs text-[#94A3B8]">{topSuggestion.distanceKm} km away</span>
+                </div>
+              </div>
+              <Button
+                size="sm"
+                variant="primary"
+                onClick={() => handleAssignSuggested(topSuggestion)}
+              >
+                Assign
+              </Button>
+            </div>
+          ) : (
+            <p className="text-xs text-[#94A3B8]">No available responders nearby</p>
+          )}
+        </div>
+      )}
 
       {showAssign && (
         <AssignVehiclePanel

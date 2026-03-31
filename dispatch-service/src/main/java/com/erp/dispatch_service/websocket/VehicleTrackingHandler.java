@@ -15,7 +15,12 @@ import org.springframework.web.socket.WebSocketSession;
 import org.springframework.web.socket.handler.TextWebSocketHandler;
 
 import java.net.URI;
-import java.util.*;
+import java.util.Iterator;
+import java.util.LinkedHashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Random;
+import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 
 @Component
@@ -60,40 +65,8 @@ public class VehicleTrackingHandler extends TextWebSocketHandler {
     public void broadcast() {
         if (sessions.isEmpty()) return;
 
-        try {
-            List<Vehicle> vehicles = vehicleService.getAllEntities();
-            // Simulate slight drift for EN_ROUTE / ON_SCENE vehicles
-            List<Map<String, Object>> payload = vehicles.stream().map(v -> {
-                double lat = v.getLatitude() != null ? v.getLatitude() : 5.55;
-                double lon = v.getLongitude() != null ? v.getLongitude() : -0.20;
-                if (v.getStatus() == Vehicle.VehicleStatus.EN_ROUTE
-                        || v.getStatus() == Vehicle.VehicleStatus.ON_SCENE) {
-                    lat += (RANDOM.nextDouble() - 0.5) * 0.002;
-                    lon += (RANDOM.nextDouble() - 0.5) * 0.002;
-                }
-                Map<String, Object> m = new LinkedHashMap<>();
-                m.put("id", v.getId().toString());
-                m.put("callSign", v.getCallSign());
-                m.put("agency", v.getAgency().name());
-                m.put("vehicleType", v.getVehicleType().name());
-                m.put("status", v.getStatus().name());
-                m.put("latitude", lat);
-                m.put("longitude", lon);
-                return m;
-            }).toList();
-
-            String json = objectMapper.writeValueAsString(payload);
-            TextMessage msg = new TextMessage(json);
-
-            for (Iterator<WebSocketSession> it = sessions.iterator(); it.hasNext(); ) {
-                WebSocketSession s = it.next();
-                if (!s.isOpen()) { it.remove(); continue; }
-                try { s.sendMessage(msg); }
-                catch (Exception e) { it.remove(); }
-            }
-        } catch (Exception e) {
-            log.error("WS broadcast error: {}", e.getMessage());
-        }
+        List<Vehicle> vehicles = vehicleService.getAllEntities();
+        vehicles.forEach(this::broadcastLocationUpdate);
     }
 
     private String extractToken(WebSocketSession session) {
@@ -105,5 +78,50 @@ public class VehicleTrackingHandler extends TextWebSocketHandler {
             if (param.startsWith("token=")) return param.substring(6);
         }
         return null;
+    }
+    public void broadcastEvent(Object event) {
+        if (sessions.isEmpty()) return;
+        try {
+            String json = objectMapper.writeValueAsString(event);
+            TextMessage msg = new TextMessage(json);
+            sendToSessions(msg);
+        } catch (Exception e) {
+            log.error("Failed to broadcast event", e);
+        }
+    }
+
+    private void broadcastLocationUpdate(Vehicle vehicle) {
+        double lat = vehicle.getLatitude() != null ? vehicle.getLatitude() : 5.55;
+        double lon = vehicle.getLongitude() != null ? vehicle.getLongitude() : -0.20;
+        if (vehicle.getStatus() == Vehicle.VehicleStatus.EN_ROUTE
+                || vehicle.getStatus() == Vehicle.VehicleStatus.ON_SCENE) {
+            lat += (RANDOM.nextDouble() - 0.5) * 0.002;
+            lon += (RANDOM.nextDouble() - 0.5) * 0.002;
+        }
+
+        Map<String, Object> event = new LinkedHashMap<>();
+        event.put("eventType", "location.updated");
+        event.put("vehicleId", vehicle.getId().toString());
+        event.put("callSign", vehicle.getCallSign());
+        event.put("vehicleType", vehicle.getVehicleType().name());
+        event.put("status", vehicle.getStatus().name());
+        event.put("location", Map.of(
+                "latitude", lat,
+                "longitude", lon
+        ));
+
+        broadcastEvent(event);
+    }
+
+    private void sendToSessions(TextMessage msg) {
+        for (Iterator<WebSocketSession> it = sessions.iterator(); it.hasNext();) {
+            WebSocketSession s = it.next();
+            if (!s.isOpen()) { it.remove(); continue; }
+            try {
+                s.sendMessage(msg);
+            } catch (Exception e) {
+                it.remove();
+            }
+        }
     }
 }

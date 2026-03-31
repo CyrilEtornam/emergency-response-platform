@@ -90,7 +90,24 @@ export function MapPage() {
   const { incidents } = useIncidents();
   const { vehicles, updateVehicle } = useVehicles();
 
-  const handleWsMessage = useCallback((data) => updateVehicle(data), [updateVehicle]);
+  const handleWsMessage = useCallback((data) => {
+    if (!data?.eventType) return;
+    if (data.eventType === 'location.updated') {
+      updateVehicle({
+        vehicleId: data.vehicleId,
+        location: data.location,
+        status: data.status,
+        callSign: data.callSign,
+        vehicleType: data.vehicleType,
+      });
+    } else if (data.eventType === 'dispatch.assigned') {
+      updateVehicle({
+        vehicleId: data.vehicleId,
+        status: data.status || 'EN_ROUTE',
+        incidentId: data.incidentId,
+      });
+    }
+  }, [updateVehicle]);
   useWebSocket(`${WS_BASE_URL}/ws/vehicles/track`, handleWsMessage, true);
 
   function toggleAgency(key) {

@@ -32,11 +32,20 @@ export function useVehicles(filters = {}) {
    * Updates a vehicle's position/state from a WebSocket message.
    */
   const updateVehicle = useCallback((update) => {
+    if (!update) return;
+    const normalized = { ...update };
+    if (update.location) {
+      normalized.latitude = update.location.latitude;
+      normalized.longitude = update.location.longitude;
+    }
+
     setVehicles((prev) => {
-      const idx = prev.findIndex((v) => v.id === update.vehicleId || v.id === update.id);
-      if (idx === -1) return prev;
+      const idx = prev.findIndex((v) => v.id === normalized.vehicleId || v.id === normalized.id);
+      if (idx === -1) {
+        return [...prev, normalized];
+      }
       const updated = [...prev];
-      updated[idx] = { ...updated[idx], ...update };
+      updated[idx] = { ...updated[idx], ...normalized };
       return updated;
     });
   }, []);
