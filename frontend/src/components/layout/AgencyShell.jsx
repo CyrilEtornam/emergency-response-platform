@@ -8,11 +8,6 @@ import { useVehicles } from '../../hooks/useVehicles';
 import { useWebSocket } from '../../hooks/useWebSocket';
 import { ROLE_TO_AGENCY, WS_BASE_URL } from '../../utils/constants';
 
-const ROLE_TO_VEHICLE_TYPE = {
-  HOSPITAL_ADMIN: 'AMBULANCE',
-  POLICE_ADMIN: 'POLICE_CAR',
-  FIRE_ADMIN: 'FIRE_TRUCK',
-};
 
 export function AgencyShell() {
   const { user } = useAuth();
@@ -23,13 +18,12 @@ export function AgencyShell() {
   const [wsLost, setWsLost] = useState(false);
 
   const agencyType = ROLE_TO_AGENCY[user?.role];
-  const vehicleType = ROLE_TO_VEHICLE_TYPE[user?.role];
 
   const { incidents, loading: incidentsLoading, error: incidentsError, refetch: refetchIncidents } =
     useIncidents(agencyType ? { type: agencyType } : {});
 
   const { vehicles, loading: vehiclesLoading, error: vehiclesError, updateVehicle } =
-    useVehicles(vehicleType ? { type: vehicleType } : {});
+    useVehicles(agencyType ? { agency: agencyType } : {});
 
   // WebSocket for live vehicle positions
   const handleWsMessage = useCallback((data) => {
@@ -76,11 +70,11 @@ export function AgencyShell() {
   }, []);
 
   return (
-    <div className="flex flex-col h-screen overflow-hidden bg-[#0F172A]">
+    <div className="flex flex-col h-screen overflow-hidden bg-base">
       <Navbar />
 
       {wsLost && (
-        <div className="bg-[#1E293B] border-b border-[#334155] px-5 py-2 text-sm text-[#94A3B8] font-medium shrink-0 flex items-center gap-2">
+        <div className="bg-surface border-b border-subtle px-5 py-2 text-[13px] text-secondary font-medium shrink-0 flex items-center gap-2">
           <svg className="w-4 h-4" viewBox="0 0 20 20" fill="currentColor">
             <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7 4a1 1 0 11-2 0 1 1 0 012 0zm-1-9a1 1 0 00-1 1v4a1 1 0 102 0V6a1 1 0 00-1-1z" clipRule="evenodd"/>
           </svg>

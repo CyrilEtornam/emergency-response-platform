@@ -13,22 +13,22 @@ const DATE_RANGES = [
 ];
 
 const AGENCY_LINES = [
-  { key: 'medical', name: 'Hospital', color: '#2563EB' },
-  { key: 'police', name: 'Police', color: '#D97706' },
-  { key: 'fire', name: 'Fire', color: '#DC2626' },
+  { key: 'medical', name: 'Hospital', color: '#4a9ee8' },
+  { key: 'police', name: 'Police', color: '#e8a82a' },
+  { key: 'fire', name: 'Fire', color: '#e84242' },
 ];
 
 const AGENCY_BARS = [
-  { key: 'medical', name: 'Hospital', color: '#2563EB' },
-  { key: 'police', name: 'Police', color: '#D97706' },
-  { key: 'fire', name: 'Fire', color: '#DC2626' },
+  { key: 'medical', name: 'Hospital', color: '#4a9ee8' },
+  { key: 'police', name: 'Police', color: '#e8a82a' },
+  { key: 'fire', name: 'Fire', color: '#e84242' },
 ];
 
 function SummaryCard({ label, value }) {
   return (
     <Card className="p-4 text-center">
-      <p className="text-xs font-medium uppercase tracking-widest text-[#94A3B8] mb-1">{label}</p>
-      <p className="text-xl font-semibold text-[#F1F5F9]">{value ?? '—'}</p>
+      <p className="text-[11px] font-medium uppercase tracking-widest text-secondary mb-1">{label}</p>
+      <p className="text-[28px] font-semibold text-primary leading-none">{value ?? '—'}</p>
     </Card>
   );
 }
@@ -36,8 +36,8 @@ function SummaryCard({ label, value }) {
 function ChartCard({ title, children }) {
   return (
     <Card>
-      <div className="px-5 py-4 border-b border-[#334155]">
-        <p className="text-sm font-semibold text-[#F1F5F9]">{title}</p>
+      <div className="px-5 py-4 border-b border-subtle">
+        <p className="text-[13px] font-semibold text-primary">{title}</p>
       </div>
       <div className="px-5 py-4">{children}</div>
     </Card>
@@ -51,7 +51,6 @@ export function AnalyticsPage() {
     dashboard,
     incidentsByType,
     responseTimeTrend,
-    statusBreakdown,
     crossAgency,
     loading,
   } = useAnalytics({ dateRange });
@@ -90,16 +89,16 @@ export function AnalyticsPage() {
     <div className="p-6 space-y-6">
       {/* Header + date range */}
       <div className="flex items-center justify-between">
-        <h1 className="text-xl font-semibold text-[#F1F5F9]">Analytics</h1>
-        <div className="flex gap-1 border border-[#334155] rounded p-0.5 bg-[#0F172A]">
+        <h1 className="text-[20px] font-semibold text-primary">Analytics</h1>
+        <div className="flex gap-1 border border-subtle rounded-[4px] p-0.5 bg-input">
           {DATE_RANGES.map((r) => (
             <button
               key={r.value}
               onClick={() => setDateRange(r.value)}
-              className={`px-3 py-1.5 text-xs font-medium rounded transition-colors ${
+              className={`px-3 py-1.5 text-[12px] font-medium rounded-[4px] transition-colors ${
                 dateRange === r.value
-                  ? 'bg-[#1E293B] text-[#F1F5F9]'
-                  : 'text-[#94A3B8] hover:text-[#F1F5F9]'
+                  ? 'bg-surface text-primary'
+                  : 'text-secondary hover:text-primary'
               }`}
             >
               {r.label}
@@ -156,7 +155,7 @@ export function AnalyticsPage() {
                 data={regionData}
                 dataKey="count"
                 nameKey="label"
-                color="#1D4ED8"
+                color="#e8622a"
                 height={220}
               />
             </ChartCard>
@@ -164,7 +163,7 @@ export function AnalyticsPage() {
             <ChartCard title="Incident Type Breakdown">
               <AgencyPieChart
                 data={agencyTypePie}
-                colors={['#2563EB', '#D97706', '#DC2626']}
+                colors={['#4a9ee8', '#e8a82a', '#e84242']}
                 height={220}
               />
             </ChartCard>
@@ -176,7 +175,7 @@ export function AnalyticsPage() {
                   mode="area"
                   dataKey="value"
                   nameKey="date"
-                  color="#1D4ED8"
+                  color="#e8622a"
                   height={200}
                 />
               </ChartCard>

@@ -12,6 +12,8 @@ import { formatDateShort } from '../../utils/formatters';
 
 const ASSIGNABLE_ROLES = ['HOSPITAL_ADMIN', 'POLICE_ADMIN', 'FIRE_ADMIN'];
 
+const inputCls = 'w-full px-3 py-2.5 text-[13px] bg-input border border-subtle text-primary rounded-[4px] focus:outline-none focus:ring-1 focus:ring-accent';
+
 function AddUserModal({ open, onClose, onCreated }) {
   const [form, setForm] = useState({ fullName: '', email: '', password: '', role: '' });
   const [loading, setLoading] = useState(false);
@@ -41,13 +43,13 @@ function AddUserModal({ open, onClose, onCreated }) {
 
   const field = (label, name, type = 'text', opts = {}) => (
     <div>
-      <label className="block text-xs font-medium uppercase tracking-widest text-[#94A3B8] mb-1.5">{label}</label>
+      <label className="block text-[11px] font-medium uppercase tracking-widest text-secondary mb-1.5">{label}</label>
       <input
         type={type}
         required
         value={form[name]}
         onChange={(e) => setForm((f) => ({ ...f, [name]: e.target.value }))}
-        className="w-full px-3 py-2.5 text-sm bg-[#0F172A] border border-[#334155] text-[#F1F5F9] rounded focus:outline-none focus:ring-2 focus:ring-[#3B82F6]"
+        className={inputCls}
         {...opts}
       />
     </div>
@@ -71,18 +73,18 @@ function AddUserModal({ open, onClose, onCreated }) {
         {field('Email', 'email', 'email')}
         {field('Password', 'password', 'password', { minLength: 8 })}
         <div>
-          <label className="block text-xs font-medium uppercase tracking-widest text-[#94A3B8] mb-1.5">Role</label>
+          <label className="block text-[11px] font-medium uppercase tracking-widest text-secondary mb-1.5">Role</label>
           <select
             required
             value={form.role}
             onChange={(e) => setForm((f) => ({ ...f, role: e.target.value }))}
-            className="w-full px-3 py-2.5 text-sm bg-[#0F172A] border border-[#334155] text-[#F1F5F9] rounded focus:outline-none focus:ring-2 focus:ring-[#3B82F6]"
+            className="w-full px-3 py-2.5 text-[13px] bg-input border border-subtle text-primary rounded-[4px] focus:outline-none focus:ring-1 focus:ring-accent appearance-none"
           >
             <option value="">Select role</option>
             {ASSIGNABLE_ROLES.map((r) => <option key={r} value={r}>{ROLE_LABELS[r]}</option>)}
           </select>
         </div>
-        {error && <p className="text-sm text-[#DC2626]">{error}</p>}
+        {error && <p className="text-[13px] text-danger">{error}</p>}
       </form>
     </Modal>
   );
@@ -138,7 +140,7 @@ export function UsersPage() {
 
   const columns = [
     { key: 'fullName', label: 'Full Name', render: (v, row) => (
-      <span className="font-medium text-[#F1F5F9]">{v || row.name || '—'}</span>
+      <span className="font-medium text-primary">{v || row.name || '—'}</span>
     )},
     { key: 'email', label: 'Email' },
     { key: 'role', label: 'Role', render: (v) => <Badge variant="role" value={v} /> },
@@ -151,20 +153,20 @@ export function UsersPage() {
         <select
           defaultValue={row.role}
           onChange={(e) => handleRoleChange(row, e.target.value)}
-          className="text-xs bg-[#0F172A] border border-[#334155] text-[#F1F5F9] rounded px-2 py-1 focus:outline-none focus:ring-1 focus:ring-[#3B82F6]"
+          className="text-[12px] bg-input border border-subtle text-primary rounded-[4px] px-2 py-1 focus:outline-none focus:ring-1 focus:ring-accent appearance-none"
         >
           {ASSIGNABLE_ROLES.map((r) => <option key={r} value={r}>{ROLE_LABELS[r]}</option>)}
         </select>
         <button
           onClick={() => handleToggleStatus(row)}
-          className={`w-9 h-5 rounded-full transition-colors ${row.active !== false ? 'bg-[#16A34A]' : 'bg-[#E5E7EB]'}`}
+          className={`w-9 h-5 rounded-full transition-colors ${row.active !== false ? 'bg-success' : 'bg-subtle'}`}
           title={row.active !== false ? 'Deactivate' : 'Activate'}
         >
           <div className={`w-4 h-4 bg-white rounded-full shadow transition-transform mx-0.5 ${row.active !== false ? 'translate-x-4' : 'translate-x-0'}`} />
         </button>
         <button
           onClick={() => setDeleteTarget(row)}
-          className="text-[#DC2626] hover:text-[#991B1B] text-xs font-medium"
+          className="text-danger hover:text-primary text-[12px] font-medium transition-colors"
         >
           Delete
         </button>
@@ -176,8 +178,8 @@ export function UsersPage() {
     <div className="p-6">
       <div className="flex items-center justify-between mb-5">
         <div>
-          <h1 className="text-xl font-semibold text-[#F1F5F9]">User Management</h1>
-          <p className="text-sm text-[#94A3B8] mt-0.5">{totalUsers} users total</p>
+          <h1 className="text-[20px] font-semibold text-primary">User Management</h1>
+          <p className="text-[13px] text-secondary mt-0.5">{totalUsers} users total</p>
         </div>
         <Button onClick={() => setAddOpen(true)}>Add User</Button>
       </div>
@@ -189,12 +191,12 @@ export function UsersPage() {
           placeholder="Search by name or email..."
           value={search}
           onChange={(e) => setSearch(e.target.value)}
-          className="flex-1 px-3 py-2 text-sm bg-[#0F172A] border border-[#334155] text-[#F1F5F9] placeholder:text-[#94A3B8] rounded focus:outline-none focus:ring-2 focus:ring-[#3B82F6]"
+          className="flex-1 px-3 py-2 text-[13px] bg-input border border-subtle text-primary placeholder:text-muted rounded-[4px] focus:outline-none focus:ring-1 focus:ring-accent"
         />
         <select
           value={roleFilter}
           onChange={(e) => setRoleFilter(e.target.value)}
-          className="px-3 py-2 text-sm bg-[#0F172A] border border-[#334155] text-[#F1F5F9] rounded focus:outline-none focus:ring-2 focus:ring-[#3B82F6]"
+          className="px-3 py-2 text-[13px] bg-input border border-subtle text-primary rounded-[4px] focus:outline-none focus:ring-1 focus:ring-accent appearance-none"
         >
           <option value="">All roles</option>
           {ASSIGNABLE_ROLES.map((r) => <option key={r} value={r}>{ROLE_LABELS[r]}</option>)}
@@ -202,7 +204,7 @@ export function UsersPage() {
         <select
           value={statusFilter}
           onChange={(e) => setStatusFilter(e.target.value)}
-          className="px-3 py-2 text-sm bg-[#0F172A] border border-[#334155] text-[#F1F5F9] rounded focus:outline-none focus:ring-2 focus:ring-[#3B82F6]"
+          className="px-3 py-2 text-[13px] bg-input border border-subtle text-primary rounded-[4px] focus:outline-none focus:ring-1 focus:ring-accent appearance-none"
         >
           <option value="">All statuses</option>
           <option value="ACTIVE">Active</option>
@@ -211,7 +213,7 @@ export function UsersPage() {
       </div>
 
       {error && (
-        <div className="mb-4 p-3 bg-[#1E293B] border border-[#DC2626]/50 rounded text-sm text-[#F87171]">
+        <div className="mb-4 p-3 bg-surface border border-danger/30 rounded-[4px] text-[13px] text-danger">
           {error}
         </div>
       )}

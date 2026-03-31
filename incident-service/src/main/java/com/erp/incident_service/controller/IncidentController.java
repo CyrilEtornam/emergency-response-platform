@@ -67,10 +67,19 @@ public class IncidentController {
     /**
      * GET /incidents/:id/suggested-responders
      * Returns top 3 nearest available responders for the incident
-     * Response: [{ id, name, type, latitude, longitude, availability, distanceKm }]
      */
     @GetMapping("/{id}/suggested-responders")
     public ResponseEntity<List<ResponderWithDistanceDTO>> getSuggestedResponders(@PathVariable UUID id) {
         return ResponseEntity.ok(responderService.getSuggestedResponders(id, 3));
+    }
+
+    /**
+     * POST /incidents/:id/auto-dispatch
+     * Finds the nearest available responder and assigns them automatically.
+     * Returns the assigned responder with distance info.
+     */
+    @PostMapping("/{id}/auto-dispatch")
+    public ResponseEntity<ResponderWithDistanceDTO> autoDispatch(@PathVariable UUID id) {
+        return ResponseEntity.ok(responderService.autoDispatch(id));
     }
 }

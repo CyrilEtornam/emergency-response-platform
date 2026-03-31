@@ -1,0 +1,47 @@
+.container {
+  position: absolute;
+  transform: translate(-50%, -50%);
+  pointer-events: none;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 4px;
+}
+
+.ring {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  border: 2px solid var(--pulse-color, #e8622a);
+  opacity: 0.7;
+}
+
+.innerRing {
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  border: 2px solid var(--pulse-color, #e8622a);
+  opacity: 0.7;
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .ring {
+    animation: pulse-ring 1.6s ease-out infinite;
+  }
+
+  .innerRing {
+    animation: pulse-ring 1.6s ease-out infinite;
+    animation-delay: 0.4s;
+  }
+}
+
+@keyframes pulse-ring {
+  0% {
+    transform: scale(1);
+    opacity: 0.6;
+  }
+  100% {
+    transform: scale(2.8);
+    opacity: 0;
+  }
+}

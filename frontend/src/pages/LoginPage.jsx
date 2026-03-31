@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
-import { Button } from '../components/common/Button';
+import { Spinner } from '../components/common/Spinner';
 
 const ROLE_ROUTES = {
   SUPER_ADMIN: '/admin/overview',
@@ -11,10 +11,10 @@ const ROLE_ROUTES = {
 };
 
 const DEMO_CREDENTIALS = [
-  { label: 'Super Admin',   email: 'admin@ghanaers.gov.gh',    password: 'Admin@1234',    color: '#6366F1' },
-  { label: 'Hospital',      email: 'hospital@ghanaers.gov.gh', password: 'Hospital@1234', color: '#2563EB' },
-  { label: 'Police',        email: 'police@ghanaers.gov.gh',   password: 'Police@1234',   color: '#D97706' },
-  { label: 'Fire',          email: 'fire@ghanaers.gov.gh',     password: 'Fire@1234',     color: '#DC2626' },
+  { label: 'Super Admin', email: 'admin@ghanaers.gov.gh',    password: 'Admin@1234',    color: '#e8622a' },
+  { label: 'Hospital',    email: 'hospital@ghanaers.gov.gh', password: 'Hospital@1234', color: '#4a9ee8' },
+  { label: 'Police',      email: 'police@ghanaers.gov.gh',   password: 'Police@1234',   color: '#e8a82a' },
+  { label: 'Fire',        email: 'fire@ghanaers.gov.gh',     password: 'Fire@1234',     color: '#e84242' },
 ];
 
 export function LoginPage() {
@@ -43,85 +43,73 @@ export function LoginPage() {
   }
 
   return (
-    <div className="h-screen flex overflow-hidden">
+    <div className="flex h-screen">
       {/* Left panel — 60% */}
-      <div className="flex-[60] relative bg-[#0F172A] flex flex-col justify-between p-12 overflow-hidden">
-        {/* Background texture */}
-        <div className="absolute inset-0 login-bg-grid" />
-
-        {/* Content */}
-        <div className="relative z-10">
-          <div className="flex items-center gap-2 mb-3">
-            <div className="w-8 h-8 bg-accent rounded flex items-center justify-center">
-              <svg className="w-5 h-5 text-white" viewBox="0 0 20 20" fill="currentColor">
-                <path fillRule="evenodd" d="M5.05 4.05a7 7 0 119.9 9.9L10 18.9l-4.95-4.95a7 7 0 010-9.9zM10 11a2 2 0 100-4 2 2 0 000 4z" clipRule="evenodd"/>
-              </svg>
-            </div>
-            <span className="text-white font-semibold text-xl tracking-tight">GhanaERS</span>
-          </div>
-          <h1 className="text-4xl font-semibold text-white leading-tight max-w-md">
-            Coordinating emergency response across Ghana
-          </h1>
+      <div className="w-[60%] bg-[#1a1a17] flex flex-col justify-between p-12">
+        {/* Top wordmark */}
+        <div>
+          <span className="text-[15px] font-semibold text-primary">GhanaERS</span>
         </div>
 
-        {/* Stat cards */}
-        <div className="relative z-10 flex gap-4">
+        {/* Middle content */}
+        <div>
+          <p className="text-[11px] uppercase tracking-widest text-accent font-medium mb-4">
+            Emergency Response Platform
+          </p>
+          <h1 className="text-[42px] font-semibold text-primary leading-[1.15] mb-4">
+            Coordinating emergency<br />response across Ghana.
+          </h1>
+          <p className="text-[15px] text-secondary">
+            Dispatch. Track. Respond. All in one screen.
+          </p>
+        </div>
+
+        {/* Bottom stats */}
+        <div className="flex">
           {[
-            { label: '3 Agencies', sub: 'Hospital · Police · Fire' },
-            { label: 'Real-time Dispatch', sub: 'Live vehicle tracking' },
-            { label: 'Nationwide Coverage', sub: 'All 16 regions' },
-          ].map((card) => (
+            { number: '3', label: 'Agencies' },
+            { number: '16', label: 'Regions Covered' },
+            { number: 'Real-time', label: 'Dispatch' },
+          ].map((stat, i) => (
             <div
-              key={card.label}
-              className="flex-1 bg-white/10 border border-white/20 rounded-[8px] px-4 py-4"
+              key={stat.label}
+              className={`flex flex-col gap-1 px-8 ${i === 0 ? 'pl-0' : ''} ${i === 2 ? 'pr-0 border-r-0' : 'border-r border-subtle'}`}
             >
-              <p className="text-white font-semibold text-sm">{card.label}</p>
-              <p className="text-white/60 text-xs mt-0.5">{card.sub}</p>
+              <span className="text-[32px] font-semibold text-primary">{stat.number}</span>
+              <span className="text-[11px] uppercase tracking-widest text-secondary">{stat.label}</span>
             </div>
           ))}
         </div>
       </div>
 
       {/* Right panel — 40% */}
-      <div className="flex-[40] flex items-center justify-center px-12 bg-[#1E293B]">
-        <div className="w-full max-w-sm">
-          {/* Logo */}
-          <div className="flex items-center gap-2 mb-8">
-            <div className="w-8 h-8 bg-accent rounded flex items-center justify-center">
-              <svg className="w-5 h-5 text-white" viewBox="0 0 20 20" fill="currentColor">
-                <path fillRule="evenodd" d="M5.05 4.05a7 7 0 119.9 9.9L10 18.9l-4.95-4.95a7 7 0 010-9.9zM10 11a2 2 0 100-4 2 2 0 000 4z" clipRule="evenodd"/>
-              </svg>
-            </div>
-            <span className="text-accent font-semibold text-lg tracking-tight">GhanaERS</span>
-          </div>
-
-          <h2 className="text-xl font-semibold text-[#F1F5F9] mb-1">Sign in to your account</h2>
-          <p className="text-sm text-[#94A3B8] mb-7">
-            Enter your credentials to access the platform
-          </p>
+      <div className="w-[40%] bg-base flex items-center justify-center">
+        <div className="w-[380px] bg-surface border border-subtle rounded-[8px] p-10">
+          <h2 className="text-[22px] font-semibold text-primary mb-1">Sign in</h2>
+          <p className="text-[14px] text-secondary mb-8">Access your agency dashboard</p>
 
           {/* Demo credentials */}
           <div className="mb-6">
-            <p className="text-xs font-medium uppercase tracking-widest text-[#94A3B8] mb-2">Demo accounts</p>
+            <p className="text-[11px] font-medium uppercase tracking-widest text-secondary mb-2">Demo accounts</p>
             <div className="grid grid-cols-2 gap-2">
               {DEMO_CREDENTIALS.map((d) => (
                 <button
                   key={d.label}
                   type="button"
                   onClick={() => { setEmail(d.email); setPassword(d.password); setError(''); }}
-                  className="flex items-center gap-2 px-3 py-2 rounded bg-[#0F172A] border border-[#334155] hover:border-[#475569] hover:bg-[#1a2744] transition-colors text-left"
+                  className="flex items-center gap-2 px-3 py-2 rounded-[4px] bg-input border border-subtle hover:border-default hover:bg-elevated transition-colors text-left"
                 >
                   <span className="w-2 h-2 rounded-full shrink-0" style={{ backgroundColor: d.color }} />
-                  <span className="text-xs text-[#F1F5F9] font-medium truncate">{d.label}</span>
+                  <span className="text-[13px] text-primary font-medium truncate">{d.label}</span>
                 </button>
               ))}
             </div>
           </div>
 
-          <form onSubmit={handleSubmit} className="space-y-4">
+          <form onSubmit={handleSubmit} className="flex flex-col gap-4">
             {/* Email */}
-            <div>
-              <label className="block text-xs font-medium uppercase tracking-widest text-[#94A3B8] mb-1.5">
+            <div className="flex flex-col gap-1.5">
+              <label className="text-[11px] font-medium tracking-widest uppercase text-secondary">
                 Email address
               </label>
               <input
@@ -131,13 +119,13 @@ export function LoginPage() {
                 required
                 autoComplete="email"
                 placeholder="you@example.com"
-                className="w-full px-3 py-2.5 text-sm bg-[#0F172A] border border-[#334155] text-[#F1F5F9] placeholder:text-[#94A3B8] rounded focus:outline-none focus:ring-2 focus:ring-[#3B82F6] focus:border-transparent"
+                className="bg-input border border-subtle rounded-[4px] px-3 py-2 text-[14px] text-primary placeholder:text-muted focus:outline-none focus:border-strong transition-colors"
               />
             </div>
 
             {/* Password */}
-            <div>
-              <label className="block text-xs font-medium uppercase tracking-widest text-[#94A3B8] mb-1.5">
+            <div className="flex flex-col gap-1.5">
+              <label className="text-[11px] font-medium tracking-widest uppercase text-secondary">
                 Password
               </label>
               <div className="relative">
@@ -148,12 +136,12 @@ export function LoginPage() {
                   required
                   autoComplete="current-password"
                   placeholder="••••••••"
-                  className="w-full px-3 py-2.5 text-sm bg-[#0F172A] border border-[#334155] text-[#F1F5F9] placeholder:text-[#94A3B8] rounded focus:outline-none focus:ring-2 focus:ring-[#3B82F6] focus:border-transparent pr-10"
+                  className="w-full bg-input border border-subtle rounded-[4px] px-3 py-2 text-[14px] text-primary placeholder:text-muted focus:outline-none focus:border-strong transition-colors pr-10"
                 />
                 <button
                   type="button"
                   onClick={() => setShowPassword((v) => !v)}
-                  className="absolute right-3 top-1/2 -translate-y-1/2 text-[#94A3B8] hover:text-[#F1F5F9]"
+                  className="absolute right-3 top-1/2 -translate-y-1/2 text-secondary hover:text-primary transition-colors"
                   tabIndex={-1}
                 >
                   {showPassword ? (
@@ -173,21 +161,17 @@ export function LoginPage() {
 
             {/* Error */}
             {error && (
-              <div className="bg-[#FEE2E2] border border-[#DC2626]/30 rounded px-3 py-2.5 text-sm text-[#DC2626]">
-                {error}
-              </div>
+              <p className="text-danger text-[13px]">{error}</p>
             )}
 
             {/* Submit */}
-            <Button
+            <button
               type="submit"
-              className="w-full"
-              size="lg"
-              loading={loading}
-              disabled={!email || !password}
+              disabled={!email || !password || loading}
+              className="w-full h-10 mt-2 bg-accent hover:bg-accent-hover text-white text-[13px] font-medium rounded-[4px] transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
             >
-              Sign in
-            </Button>
+              {loading ? <Spinner size="sm" className="text-white" /> : 'Sign in'}
+            </button>
           </form>
         </div>
       </div>

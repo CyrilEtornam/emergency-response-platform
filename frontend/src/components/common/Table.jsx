@@ -31,13 +31,13 @@ export function Table({ columns, data, loading, emptyTitle, emptyDescription, on
 
   return (
     <div className="overflow-x-auto">
-      <table className="w-full text-sm">
+      <table className="w-full">
         <thead>
-          <tr className="bg-[#0F172A] border-b border-[#334155]">
+          <tr className="bg-elevated border-b border-default">
             {columns.map((col) => (
               <th
                 key={col.key}
-                className="px-4 py-3 text-left text-xs font-medium uppercase tracking-widest text-[#94A3B8]"
+                className="px-4 py-3 text-left text-[11px] font-medium uppercase tracking-widest text-secondary"
                 style={{ width: col.width }}
               >
                 {col.label}
@@ -51,13 +51,13 @@ export function Table({ columns, data, loading, emptyTitle, emptyDescription, on
               key={row.id || i}
               onClick={() => onRowClick?.(row)}
               className={clsx(
-                'border-b border-[#334155] last:border-0 transition-colors',
-                onRowClick && 'cursor-pointer hover:bg-[#263147]',
-                selectedId && row.id === selectedId && 'bg-[#1E3A5F]'
+                'border-b border-subtle last:border-0 transition-colors',
+                onRowClick && 'cursor-pointer hover:bg-elevated',
+                selectedId && row.id === selectedId && 'bg-accent/10'
               )}
             >
               {columns.map((col) => (
-                <td key={col.key} className="px-4 py-3 text-[#F1F5F9]">
+                <td key={col.key} className="px-4 py-3 text-[14px] text-primary">
                   {col.render ? col.render(row[col.key], row) : row[col.key] ?? '—'}
                 </td>
               ))}
@@ -72,22 +72,22 @@ export function Table({ columns, data, loading, emptyTitle, emptyDescription, on
 export function Pagination({ page, totalPages, onPageChange }) {
   if (totalPages <= 1) return null;
   return (
-    <div className="flex items-center justify-between px-4 py-3 border-t border-[#334155]">
-      <p className="text-sm text-[#94A3B8]">
+    <div className="flex items-center justify-between px-4 py-3 border-t border-subtle">
+      <p className="text-[13px] text-secondary">
         Page {page + 1} of {totalPages}
       </p>
       <div className="flex gap-2">
         <button
           onClick={() => onPageChange(page - 1)}
           disabled={page === 0}
-          className="px-3 py-1.5 text-sm border border-[#334155] rounded disabled:opacity-40 hover:bg-[#263147] text-[#F1F5F9]"
+          className="px-3 py-1.5 text-[13px] border border-subtle rounded-[4px] disabled:opacity-40 hover:bg-elevated text-primary transition-colors"
         >
           Previous
         </button>
         <button
           onClick={() => onPageChange(page + 1)}
           disabled={page >= totalPages - 1}
-          className="px-3 py-1.5 text-sm border border-[#334155] rounded disabled:opacity-40 hover:bg-[#263147] text-[#F1F5F9]"
+          className="px-3 py-1.5 text-[13px] border border-subtle rounded-[4px] disabled:opacity-40 hover:bg-elevated text-primary transition-colors"
         >
           Next
         </button>

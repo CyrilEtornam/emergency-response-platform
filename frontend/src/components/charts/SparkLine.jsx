@@ -1,8 +1,8 @@
 import React from 'react';
 import { LineChart, Line, ResponsiveContainer, Tooltip } from 'recharts';
 
-export function SparkLine({ data = [], dataKey = 'value', color = '#1D4ED8', height = 40 }) {
-  if (!data.length) return <div style={{ height }} className="flex items-center justify-center text-xs text-[#6B7280]">No data</div>;
+export function SparkLine({ data = [], dataKey = 'value', color = '#e8622a', height = 40 }) {
+  if (!data.length) return <div style={{ height }} className="flex items-center justify-center text-[13px] text-muted">No data</div>;
 
   return (
     <ResponsiveContainer width="100%" height={height}>
@@ -16,8 +16,8 @@ export function SparkLine({ data = [], dataKey = 'value', color = '#1D4ED8', hei
           isAnimationActive={false}
         />
         <Tooltip
-          contentStyle={{ fontSize: 11, padding: '2px 6px', background: '#1E293B', border: '1px solid #334155', borderRadius: 4, color: '#F1F5F9' }}
-          itemStyle={{ color: '#F1F5F9' }}
+          contentStyle={{ fontSize: 11, padding: '2px 6px', background: '#333330', border: '1px solid #4a4a45', borderRadius: 4, color: '#f0ede6' }}
+          itemStyle={{ color: '#f0ede6' }}
           labelFormatter={() => ''}
         />
       </LineChart>

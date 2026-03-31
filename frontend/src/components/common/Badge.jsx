@@ -1,46 +1,66 @@
 import React from 'react';
 import clsx from 'clsx';
-import { STATUS_COLORS, SEVERITY_COLORS, AGENCY_COLORS, ROLE_LABELS } from '../../utils/constants';
+import { ROLE_LABELS } from '../../utils/constants';
 
-/**
- * Flexible badge component.
- * variant: 'status' | 'severity' | 'agency' | 'role' | 'custom'
- * value: the key to look up (e.g. 'REPORTED', 'CRITICAL', 'MEDICAL')
- * For 'custom': pass bg and text props directly.
- */
-export function Badge({ variant = 'status', value, bg, text, className, children }) {
-  let bgColor = bg;
-  let textColor = text;
+// Full class strings written out completely for Tailwind JIT scanning
+const STATUS_CLASSES = {
+  REPORTED:    'bg-warning/15 text-warning',
+  ASSIGNED:    'bg-warning/15 text-warning',
+  EN_ROUTE:    'bg-info/15 text-info',
+  RESOLVED:    'bg-success/15 text-success',
+  AVAILABLE:   'bg-success/15 text-success',
+  ON_SCENE:    'bg-danger/15 text-danger',
+  RETURNING:   'bg-info/15 text-info',
+  ACTIVE:      'bg-info/15 text-info',
+  INACTIVE:    'bg-elevated text-muted border border-subtle',
+};
+
+const SEVERITY_CLASSES = {
+  CRITICAL: 'bg-danger/15 text-danger',
+  HIGH:     'bg-accent/15 text-accent',
+  MEDIUM:   'bg-warning/15 text-warning',
+  LOW:      'bg-success/15 text-success',
+};
+
+const AGENCY_CLASSES = {
+  MEDICAL:  'bg-medical/15 text-medical',
+  HOSPITAL: 'bg-medical/15 text-medical',
+  POLICE:   'bg-police/15 text-police',
+  FIRE:     'bg-fire/15 text-fire',
+};
+
+const ROLE_CLASSES = {
+  SUPER_ADMIN:    'bg-accent/15 text-accent',
+  HOSPITAL_ADMIN: 'bg-medical/15 text-medical',
+  POLICE_ADMIN:   'bg-police/15 text-police',
+  FIRE_ADMIN:     'bg-fire/15 text-fire',
+};
+
+export function Badge({ variant = 'status', value, className, children }) {
+  let colorClass = '';
   let label = children || value;
 
   if (variant === 'status' && value) {
-    const c = STATUS_COLORS[value] || { bg: '#F3F4F6', text: '#6B7280' };
-    bgColor = c.bg;
-    textColor = c.text;
+    colorClass = STATUS_CLASSES[value] || 'bg-elevated text-muted';
     label = value?.replaceAll('_', ' ');
   } else if (variant === 'severity' && value) {
-    const c = SEVERITY_COLORS[value] || SEVERITY_COLORS.LOW;
-    bgColor = c.bg;
-    textColor = c.text;
+    colorClass = SEVERITY_CLASSES[value] || 'bg-elevated text-muted';
     label = value;
   } else if (variant === 'agency' && value) {
-    const c = AGENCY_COLORS[value] || { bg: '#F3F4F6', color: '#6B7280' };
-    bgColor = c.bg;
-    textColor = c.color;
+    colorClass = AGENCY_CLASSES[value] || 'bg-elevated text-muted';
     label = value?.replaceAll('_', ' ');
   } else if (variant === 'role' && value) {
-    bgColor = '#EFF6FF';
-    textColor = '#2563EB';
+    colorClass = ROLE_CLASSES[value] || 'bg-elevated text-muted';
     label = ROLE_LABELS[value] || value;
   }
 
   return (
     <span
       className={clsx(
-        'inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium tracking-wide',
+        'inline-flex items-center px-2 py-0.5 rounded-full text-[11px] font-medium uppercase tracking-wide',
+        colorClass,
         className
       )}
-      style={{ backgroundColor: bgColor, color: textColor }}
     >
       {label}
     </span>

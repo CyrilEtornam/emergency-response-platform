@@ -44,5 +44,5 @@ public class Vehicle {
 
     public enum Agency       { MEDICAL, POLICE, FIRE }
     public enum VehicleType  { AMBULANCE, POLICE_CAR, FIRE_TRUCK }
-    public enum VehicleStatus { AVAILABLE, EN_ROUTE, ON_SCENE, OFFLINE }
+    public enum VehicleStatus { AVAILABLE, EN_ROUTE, ON_SCENE, OFFLINE, MAINTENANCE }
 }

@@ -1,106 +1,75 @@
-import React, { useCallback, useEffect, useRef, useState } from 'react';
-import { GoogleMap, StandaloneSearchBox, Polygon } from '@react-google-maps/api';
+import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import {
+  GoogleMap,
+  StandaloneSearchBox,
+  DirectionsRenderer,
+  Polygon,
+  OverlayView,
+} from '@react-google-maps/api';
+import { MarkerClusterer } from '@googlemaps/markerclusterer';
+
 import { IncidentMarker } from './IncidentMarker';
 import { VehicleMarker } from './VehicleMarker';
 import { IncidentInfoWindow } from './IncidentInfoWindow';
 import { GHANA_CENTER, DEFAULT_ZOOM } from '../../utils/constants';
 import { Spinner } from '../common/Spinner';
+import ghanaRegions from '../../data/ghanaRegions';
+import { PulseOverlay } from './PulseOverlay';
+import { getIncidentIcon } from './IncidentMarker';
+
+const darkMapStyles = [
+  { elementType: "geometry", stylers: [{ color: "#1c1c19" }] },
+  { elementType: "labels.text.fill", stylers: [{ color: "#6b6860" }] },
+  { elementType: "labels.text.stroke", stylers: [{ color: "#1c1c19" }] },
+  { featureType: "landscape", elementType: "geometry", stylers: [{ color: "#1a1a17" }] },
+  { featureType: "water", elementType: "geometry", stylers: [{ color: "#14140f" }] },
+  { featureType: "water", elementType: "labels.text.fill", stylers: [{ color: "#3a3a36" }] },
+  { featureType: "park", elementType: "geometry", stylers: [{ color: "#1e2018" }] },
+  { featureType: "road", elementType: "geometry.fill", stylers: [{ color: "#3e3e38" }] },
+  { featureType: "road", elementType: "geometry.stroke", stylers: [{ color: "#28281f" }] },
+  { featureType: "road", elementType: "labels.text.fill", stylers: [{ color: "#9a9a90" }] },
+  { featureType: "road.local", elementType: "geometry.fill", stylers: [{ color: "#3e3e38" }] },
+  { featureType: "road.arterial", elementType: "geometry.fill", stylers: [{ color: "#52524a" }] },
+  { featureType: "road.arterial", elementType: "labels.text.fill", stylers: [{ color: "#a0a098" }] },
+  { featureType: "road.highway", elementType: "geometry.fill", stylers: [{ color: "#686860" }] },
+  { featureType: "road.highway", elementType: "geometry.stroke", stylers: [{ color: "#3a3a32" }] },
+  { featureType: "road.highway", elementType: "labels.text.fill", stylers: [{ color: "#c0c0b8" }] },
+  { featureType: "administrative", elementType: "geometry.stroke", stylers: [{ color: "#3a3a36" }] },
+  { featureType: "administrative.country", elementType: "geometry.stroke", stylers: [{ color: "#5a5a50" }] },
+  { featureType: "administrative.locality", elementType: "labels.text.fill", stylers: [{ color: "#7a7a70" }] },
+  { featureType: "poi", stylers: [{ visibility: "off" }] },
+  { featureType: "transit", stylers: [{ visibility: "off" }] },
+];
 
 const MAP_OPTIONS = {
   streetViewControl: false,
   mapTypeControl: false,
   fullscreenControl: true,
   zoomControl: true,
-  styles: [
-    { elementType: 'geometry', stylers: [{ color: '#242f3e' }] },
-    { elementType: 'labels.text.stroke', stylers: [{ color: '#242f3e' }] },
-    { elementType: 'labels.text.fill', stylers: [{ color: '#746855' }] },
-    { featureType: 'administrative.locality', elementType: 'labels.text.fill', stylers: [{ color: '#d59563' }] },
-    { featureType: 'poi', stylers: [{ visibility: 'off' }] },
-    { featureType: 'transit', stylers: [{ visibility: 'off' }] },
-    { featureType: 'road', elementType: 'geometry', stylers: [{ color: '#38414e' }] },
-    { featureType: 'road', elementType: 'geometry.stroke', stylers: [{ color: '#212a37' }] },
-    { featureType: 'road', elementType: 'labels.text.fill', stylers: [{ color: '#9ca5b3' }] },
-    { featureType: 'road.highway', elementType: 'geometry', stylers: [{ color: '#746855' }] },
-    { featureType: 'road.highway', elementType: 'geometry.stroke', stylers: [{ color: '#1f2835' }] },
-    { featureType: 'road.highway', elementType: 'labels.text.fill', stylers: [{ color: '#f3d19c' }] },
-    { featureType: 'water', elementType: 'geometry', stylers: [{ color: '#17263c' }] },
-    { featureType: 'water', elementType: 'labels.text.fill', stylers: [{ color: '#515c6d' }] },
-    { featureType: 'water', elementType: 'labels.text.stroke', stylers: [{ color: '#17263c' }] },
-  ],
-  restriction: {
-    latLngBounds: {
-      north: 11.2,
-      south: 4.5,
-      west: -3.5,
-      east: 1.2,
-    },
-    strictBounds: true,
-  },
-  minZoom: 6.5,
-  maxZoom: 18,
+  styles: darkMapStyles,
 };
 
 const containerStyle = { width: '100%', height: '100%' };
 
-// Ghana's more accurate border coordinates
-const GHANA_BORDER = [
-  // Eastern border (Togo/Benin)
-  { lat: 11.1667, lng: 0.0000 },
-  { lat: 11.0000, lng: 0.8000 },
-  { lat: 10.7500, lng: 1.0000 },
-  { lat: 10.3000, lng: 0.9500 },
-  { lat: 9.9000, lng: 0.8500 },
-  { lat: 9.5000, lng: 0.7000 },
-  { lat: 9.2000, lng: 0.5500 },
-  { lat: 8.8000, lng: 0.6500 },
-  { lat: 8.5000, lng: 0.5000 },
-  { lat: 8.2000, lng: 0.3500 },
-  { lat: 8.0000, lng: 0.2000 },
-  { lat: 7.5000, lng: 0.5500 },
-  { lat: 7.0000, lng: 1.0000 },
-  { lat: 6.5000, lng: 1.2000 },
-  { lat: 6.0000, lng: 1.1000 },
-  { lat: 5.5000, lng: 0.8000 },
-  // Southern border (Gulf of Guinea)
-  { lat: 5.0000, lng: 0.2000 },
-  { lat: 4.7500, lng: -0.5000 },
-  { lat: 4.7000, lng: -1.2000 },
-  { lat: 4.7500, lng: -1.8000 },
-  // Western border (Côte d'Ivoire)
-  { lat: 5.0000, lng: -2.5000 },
-  { lat: 5.5000, lng: -3.0000 },
-  { lat: 6.0000, lng: -3.2500 },
-  { lat: 6.5000, lng: -3.2000 },
-  { lat: 7.0000, lng: -3.2500 },
-  { lat: 7.5000, lng: -3.0000 },
-  { lat: 8.0000, lng: -2.9000 },
-  { lat: 8.5000, lng: -2.8000 },
-  { lat: 9.0000, lng: -2.8000 },
-  { lat: 9.5000, lng: -2.7500 },
-  // Northern border (Burkina Faso)
-  { lat: 10.0000, lng: -2.6000 },
-  { lat: 10.5000, lng: -2.7000 },
-  { lat: 11.0000, lng: -2.5000 },
-  { lat: 11.1667, lng: -1.5000 },
-  { lat: 11.1667, lng: -0.5000 },
-  { lat: 11.1667, lng: 0.0000 },
-];
-
-const GHANA_POLYGON_OPTIONS = {
-  strokeColor: '#3B82F6',
-  strokeOpacity: 1.0,
-  strokeWeight: 3,
-  fillColor: '#1E40AF',
+const regionPolygonOptions = (color) => ({
+  strokeColor: color,
+  strokeOpacity: 0.6,
+  strokeWeight: 1.5,
+  fillColor: color,
   fillOpacity: 0.06,
-  clickable: false,
+  clickable: true,
   zIndex: 1,
+});
+
+const severityColors = {
+  CRITICAL: '#e84242',
+  HIGH: '#e8622a',
+  MEDIUM: '#e8a82a',
+  LOW: '#4caf6e',
 };
 
-/**
- * MapPanel — mounted ONCE in AgencyShell, never unmounts.
- * Controlled entirely through props.
- */
+const getSeverityColor = (severity) => severityColors[severity] || '#e8622a';
+
 export function MapPanel({
   activeTab,
   incidents = [],
@@ -110,63 +79,101 @@ export function MapPanel({
   onIncidentClick,
   onVehicleClick,
   onMapClick,
+  onRegionClick,
   reportPin,
-  agencyFilters,     // for admin map: { MEDICAL: bool, POLICE: bool, FIRE: bool }
+  agencyFilters,
   showVehicles = true,
   showIncidents = true,
+  showRegions = true,
 }) {
   const mapRef = useRef(null);
   const searchBoxRef = useRef(null);
+  const clustererRef = useRef(null);
+  const clusterMarkersRef = useRef([]);
+
   const [infoWindowIncident, setInfoWindowIncident] = useState(null);
   const [isLoaded, setIsLoaded] = useState(false);
+  const [directions, setDirections] = useState(null);
+  const [zoomLevel, setZoomLevel] = useState(DEFAULT_ZOOM);
+  const [regionLabel, setRegionLabel] = useState(null);
 
   const onLoad = useCallback((map) => {
     mapRef.current = map;
     setIsLoaded(true);
   }, []);
 
+  /**
+   * SEARCH
+   */
   const handlePlacesChanged = useCallback(() => {
     const places = searchBoxRef.current?.getPlaces();
-    if (!places || places.length === 0) return;
-    const place = places[0];
-    if (!place.geometry?.location) return;
-    mapRef.current?.panTo(place.geometry.location);
+    if (!places?.length) return;
+
+    const loc = places[0]?.geometry?.location;
+    if (!loc) return;
+
+    mapRef.current?.panTo(loc);
     mapRef.current?.setZoom(13);
   }, []);
 
+  /**
+   * ROUTE CALCULATION
+   */
+  const calculateRoute = useCallback((vehicle, incident) => {
+    if (!window.google) return;
+
+    const directionsService = new window.google.maps.DirectionsService();
+
+    directionsService.route(
+      {
+        origin: { lat: Number(vehicle.lat), lng: Number(vehicle.lng) },
+        destination: {
+          lat: Number(incident.latitude || incident.lat),
+          lng: Number(incident.longitude || incident.lng),
+        },
+        travelMode: window.google.maps.TravelMode.DRIVING,
+      },
+      (result, status) => {
+        if (status === "OK") {
+          setDirections(result);
+        }
+      }
+    );
+  }, []);
+
+  /**
+   * TRIGGER ROUTE
+   */
+  useEffect(() => {
+    if (!selectedVehicleId || !selectedIncidentId) return;
+
+    const vehicle = vehicles.find(v => v.id === selectedVehicleId);
+    const incident = incidents.find(i => i.id === selectedIncidentId);
+
+    if (vehicle && incident) {
+      calculateRoute(vehicle, incident);
+    }
+  }, [selectedVehicleId, selectedIncidentId, vehicles, incidents, calculateRoute]);
+
   const isReportTab = activeTab === 'report';
-  const cursorStyle = isReportTab ? 'crosshair' : 'default';
+
+  const selectedIncident = useMemo(
+    () => incidents.find((i) => i.id === selectedIncidentId),
+    [incidents, selectedIncidentId]
+  );
 
   const handleMapClick = useCallback((e) => {
+    setRegionLabel(null);
     if (isReportTab && onMapClick) {
       onMapClick({ lat: e.latLng.lat(), lng: e.latLng.lng() });
     }
   }, [isReportTab, onMapClick]);
 
-  const handleIncidentMarkerClick = useCallback((incident) => {
+  const handleIncidentClick = useCallback((incident) => {
     setInfoWindowIncident(incident);
     onIncidentClick?.(incident);
-    if (mapRef.current) {
-      mapRef.current.panTo({
-        lat: Number(incident.latitude || incident.lat),
-        lng: Number(incident.longitude || incident.lng),
-      });
-    }
   }, [onIncidentClick]);
 
-  useEffect(() => {
-    if (!mapRef.current || !selectedIncidentId) return;
-    const incident = incidents.find(i => i.id === selectedIncidentId);
-    if (incident) {
-      mapRef.current.panTo({
-        lat: Number(incident.latitude || incident.lat),
-        lng: Number(incident.longitude || incident.lng),
-      });
-      mapRef.current.setZoom(13);
-    }
-  }, [selectedIncidentId, incidents]);
-
-  // Filter incidents for admin map
   const visibleIncidents = incidents.filter((inc) => {
     if (!showIncidents) return false;
     if (!agencyFilters) return true;
@@ -179,10 +186,107 @@ export function MapPanel({
     return agencyFilters[v.agencyType || v.type] !== false;
   });
 
+  const handleRegionClick = useCallback((region, e) => {
+    const lat = e?.latLng?.lat?.();
+    const lng = e?.latLng?.lng?.();
+    if (lat == null || lng == null) return;
+    setRegionLabel({ name: region.name, position: { lat, lng } });
+    onRegionClick?.(region.name);
+  }, [onRegionClick]);
+
+  const clearClusterer = useCallback(() => {
+    clustererRef.current?.clearMarkers();
+    clusterMarkersRef.current.forEach((m) => m.setMap(null));
+    clustererRef.current = null;
+    clusterMarkersRef.current = [];
+  }, []);
+
+  const shouldCluster = activeTab === 'incidents' && showIncidents && (zoomLevel <= 9);
+
+  useEffect(() => {
+    if (!mapRef.current || !window.google) return undefined;
+
+    if (!shouldCluster) {
+      clearClusterer();
+      return undefined;
+    }
+
+    clearClusterer();
+
+    const markers = visibleIncidents.map((inc) => {
+      const position = {
+        lat: Number(inc.latitude || inc.lat),
+        lng: Number(inc.longitude || inc.lng),
+      };
+
+      if (Number.isNaN(position.lat) || Number.isNaN(position.lng)) return null;
+
+      const marker = new window.google.maps.Marker({
+        position,
+        icon: getIncidentIcon(inc.severity || 'LOW', inc.id === selectedIncidentId),
+      });
+
+      marker.addListener('click', () => handleIncidentClick(inc));
+
+      return marker;
+    }).filter(Boolean);
+
+    const renderer = {
+      render({ count, position }) {
+        const scale = Math.min(36, 18 + count * 1.5);
+
+        return new window.google.maps.Marker({
+          position,
+          icon: {
+            path: window.google.maps.SymbolPath.CIRCLE,
+            fillColor: '#e8622a',
+            fillOpacity: 0.9,
+            strokeColor: '#ffffff',
+            strokeOpacity: 0.4,
+            strokeWeight: 6,
+            scale,
+          },
+          label: {
+            text: String(count),
+            color: '#ffffff',
+            fontWeight: '700',
+            fontSize: '12px',
+          },
+          zIndex: 2,
+        });
+      },
+    };
+
+    clustererRef.current = new MarkerClusterer({
+      map: mapRef.current,
+      markers,
+      renderer,
+      gridSize: 60,
+    });
+
+    clusterMarkersRef.current = markers;
+
+    clustererRef.current.addListener('clusterclick', (event) => {
+      const bounds = new window.google.maps.LatLngBounds();
+      event?.markers?.forEach((m) => {
+        const pos = m.getPosition();
+        if (pos) bounds.extend(pos);
+      });
+
+      if (!bounds.isEmpty()) {
+        mapRef.current?.fitBounds(bounds);
+      }
+    });
+
+    return () => {
+      clearClusterer();
+    };
+  }, [shouldCluster, visibleIncidents, selectedIncidentId, handleIncidentClick, clearClusterer]);
+
   return (
-    <div className="relative w-full h-full" style={{ cursor: cursorStyle }}>
+    <div className="relative w-full h-full">
       {!isLoaded && (
-        <div className="absolute inset-0 flex items-center justify-center bg-[#1E293B] z-10">
+        <div className="absolute inset-0 flex items-center justify-center bg-surface z-10">
           <Spinner size="xl" />
         </div>
       )}
@@ -192,12 +296,11 @@ export function MapPanel({
           <StandaloneSearchBox
             onLoad={(ref) => (searchBoxRef.current = ref)}
             onPlacesChanged={handlePlacesChanged}
-            bounds={{ north: 11.2, south: 4.5, west: -3.5, east: 1.2 }}
           >
             <input
               type="text"
-              placeholder="Search location in Ghana..."
-              className="w-full px-3 py-2 text-sm bg-[#1E293B] border border-[#334155] text-[#F1F5F9] placeholder:text-[#94A3B8] rounded shadow-lg focus:outline-none focus:ring-2 focus:ring-[#3B82F6]"
+              placeholder="Search location..."
+              className="w-full px-3 py-2 bg-surface border rounded"
             />
           </StandaloneSearchBox>
         </div>
@@ -210,46 +313,92 @@ export function MapPanel({
         options={MAP_OPTIONS}
         onLoad={onLoad}
         onClick={handleMapClick}
+        onZoomChanged={() => setZoomLevel(mapRef.current?.getZoom() ?? DEFAULT_ZOOM)}
       >
-        {/* Ghana border outline — always visible */}
-        <Polygon paths={GHANA_BORDER} options={GHANA_POLYGON_OPTIONS} />
-
-        {/* Incident markers — shown on incidents tab and admin map */}
-        {(activeTab === 'incidents' || activeTab === 'admin-map') &&
-          visibleIncidents.map((inc) => (
-            <IncidentMarker
-              key={inc.id}
-              incident={inc}
-              isSelected={inc.id === selectedIncidentId}
-              onClick={handleIncidentMarkerClick}
-            />
-          ))}
-
-        {/* Vehicle markers — shown on dispatch tab and admin map */}
-        {(activeTab === 'dispatch' || activeTab === 'admin-map') &&
-          visibleVehicles.map((v) => (
-            <VehicleMarker
-              key={v.id}
-              vehicle={v}
-              isSelected={v.id === selectedVehicleId}
-              onClick={(vehicle) => onVehicleClick?.(vehicle)}
-            />
-          ))}
-
-        {/* Report tab: show only the dropped pin */}
-        {activeTab === 'report' && reportPin && (
-          <IncidentMarker
-            incident={{ ...reportPin, severity: 'HIGH', id: 'report-pin' }}
-            isSelected
-            onClick={() => {}}
+        {/* REGIONS */}
+        {showRegions && ghanaRegions.map((region) => (
+          <Polygon
+            key={region.name}
+            paths={region.coordinates}
+            options={regionPolygonOptions(region.color)}
+            onClick={(e) => handleRegionClick(region, e)}
           />
+        ))}
+
+        {regionLabel && (
+          <OverlayView
+            position={regionLabel.position}
+            mapPaneName={OverlayView.FLOAT_PANE}
+          >
+            <div className="bg-[#1f1f1b] border border-[#3c3c35] text-[13px] font-semibold text-white px-3 py-2 rounded shadow-md transform -translate-x-1/2 -translate-y-full whitespace-nowrap">
+              {regionLabel.name}
+            </div>
+          </OverlayView>
         )}
 
-        {/* Info window for clicked incident */}
+        {/* INCIDENTS */}
+        {!shouldCluster && visibleIncidents.map((inc) => (
+          <IncidentMarker
+            key={inc.id}
+            incident={inc}
+            isSelected={inc.id === selectedIncidentId}
+            onClick={handleIncidentClick}
+          />
+        ))}
+
+        {/* VEHICLES */}
+        {visibleVehicles.map((v) => (
+          <VehicleMarker
+            key={v.id}
+            vehicle={v}
+            isSelected={v.id === selectedVehicleId}
+            onClick={onVehicleClick}
+          />
+        ))}
+
+        {/* ROUTE GLOW */}
+        {directions && (
+          <>
+            <DirectionsRenderer
+              directions={directions}
+              options={{
+                polylineOptions: {
+                  strokeColor: "#00e5ff",
+                  strokeOpacity: 0.3,
+                  strokeWeight: 12,
+                },
+                suppressMarkers: true,
+              }}
+            />
+            <DirectionsRenderer
+              directions={directions}
+              options={{
+                polylineOptions: {
+                  strokeColor: "#00e5ff",
+                  strokeOpacity: 1,
+                  strokeWeight: 5,
+                },
+                suppressMarkers: true,
+              }}
+            />
+          </>
+        )}
+
+        {/* INFO WINDOW */}
         {infoWindowIncident && (
           <IncidentInfoWindow
             incident={infoWindowIncident}
             onClose={() => setInfoWindowIncident(null)}
+          />
+        )}
+
+        {selectedIncident && (
+          <PulseOverlay
+            position={{
+              lat: Number(selectedIncident.latitude || selectedIncident.lat),
+              lng: Number(selectedIncident.longitude || selectedIncident.lng),
+            }}
+            color={getSeverityColor(selectedIncident.severity)}
           />
         )}
       </GoogleMap>

@@ -10,10 +10,10 @@ export function Navbar() {
   const agencyStyle = AGENCY_COLORS[agencyType] || null;
 
   return (
-    <header className="h-14 bg-[#1E293B] border-b border-[#334155] flex items-center px-5 shrink-0 z-20">
+    <header className="h-[52px] bg-surface border-b border-subtle flex items-center px-4 shrink-0 z-20">
       {/* Wordmark */}
       <div className="flex items-center gap-1.5 shrink-0">
-        <span className="text-accent font-semibold text-base tracking-tight">GhanaERS</span>
+        <span className="text-[15px] font-semibold text-primary">GhanaERS</span>
       </div>
 
       {/* Agency name */}
@@ -21,23 +21,25 @@ export function Navbar() {
         {agencyStyle && (
           <div className="flex items-center gap-2">
             <span
-              className="w-2.5 h-2.5 rounded-full shrink-0"
+              className="w-2 h-2 rounded-full shrink-0"
               style={{ backgroundColor: agencyStyle.color }}
             />
-            <span className="text-sm font-medium text-[#F1F5F9]">{agencyStyle.label}</span>
+            <span className="text-[14px] text-secondary">{agencyStyle.label}</span>
           </div>
         )}
       </div>
 
       {/* User info */}
-      <div className="flex items-center gap-4 shrink-0">
+      <div className="flex items-center gap-3 shrink-0">
         {user && (
           <div className="flex items-center gap-3">
             <div className="text-right">
-              <p className="text-sm font-medium text-[#F1F5F9] leading-tight">
+              <p className="text-[13px] text-secondary leading-tight">
                 {user.fullName || user.email}
               </p>
-              <p className="text-xs text-[#94A3B8]">{ROLE_LABELS[user.role] || user.role}</p>
+              <span className="inline-flex items-center px-2 py-0.5 rounded-full text-[11px] font-medium uppercase tracking-widest bg-elevated border border-subtle text-muted">
+                {ROLE_LABELS[user.role] || user.role}
+              </span>
             </div>
           </div>
         )}

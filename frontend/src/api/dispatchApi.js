@@ -28,3 +28,13 @@ export async function getStations(params = {}) {
   const res = await dispatchAxios.get('/stations', { params });
   return unwrap(res);
 }
+
+export async function createDispatch(data) {
+  const res = await dispatchAxios.post('/dispatches', data);
+  return unwrap(res);
+}
+
+export async function updateDispatchStatus(id, status) {
+  const res = await dispatchAxios.patch(`/dispatches/${id}/status`, null, { params: { status } });
+  return unwrap(res);
+}

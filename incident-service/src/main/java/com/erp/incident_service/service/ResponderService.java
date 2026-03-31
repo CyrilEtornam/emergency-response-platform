@@ -145,6 +145,22 @@ public class ResponderService {
         }
     }
 
+    /**
+     * POST /incidents/:id/auto-dispatch
+     * Finds the nearest available responder and assigns them automatically.
+     */
+    @Transactional
+    public ResponderWithDistanceDTO autoDispatch(UUID incidentId) {
+        List<ResponderWithDistanceDTO> suggestions = getSuggestedResponders(incidentId, 1);
+        if (suggestions.isEmpty()) {
+            throw new RuntimeException("No available responders found near incident " + incidentId);
+        }
+        ResponderWithDistanceDTO nearest = suggestions.get(0);
+        assignResponder(nearest.getId(), incidentId, true);
+        log.info("Auto-dispatched responder {} to incident {}", nearest.getId(), incidentId);
+        return nearest;
+    }
+
     private String mapVehicleType(ResponderType type) {
         return switch (type) {
             case MEDICAL -> "AMBULANCE";

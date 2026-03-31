@@ -24,7 +24,7 @@ export function ResponseTimeChart({
   lines = [],
   dataKey = 'avgMinutes',
   nameKey = 'date',
-  color = '#1D4ED8',
+  color = '#e8622a',
   height = 220,
 }) {
   if (!data.length) {
@@ -41,10 +41,10 @@ export function ResponseTimeChart({
   };
 
   const axisProps = {
-    XAxis: { dataKey: nameKey, tick: { fontSize: 11, fill: '#94A3B8' }, axisLine: { stroke: '#334155' }, tickLine: false },
-    YAxis: { tick: { fontSize: 11, fill: '#94A3B8' }, axisLine: { stroke: '#334155' }, tickLine: false, unit: ' min', allowDecimals: false },
-    CartesianGrid: { strokeDasharray: '3 3', vertical: false, stroke: '#334155' },
-    Tooltip: { contentStyle: { background: '#1E293B', border: '1px solid #334155', borderRadius: '6px', color: '#F1F5F9' } },
+    XAxis: { dataKey: nameKey, tick: { fontSize: 11, fill: '#6b6860' }, axisLine: { stroke: '#3a3a36' }, tickLine: false },
+    YAxis: { tick: { fontSize: 11, fill: '#6b6860' }, axisLine: { stroke: '#3a3a36' }, tickLine: false, unit: ' min', allowDecimals: false },
+    CartesianGrid: { strokeDasharray: '3 3', vertical: false, stroke: '#3a3a36' },
+    Tooltip: { contentStyle: { background: '#333330', border: '1px solid #4a4a45', borderRadius: '6px', color: '#f0ede6' } },
   };
 
   if (mode === 'area') {
@@ -70,7 +70,7 @@ export function ResponseTimeChart({
         <Tooltip {...axisProps.Tooltip} />
         {mode === 'multi' && lines.length > 0 ? (
           <>
-            <Legend iconType="circle" iconSize={8} wrapperStyle={{ fontSize: 11 }} formatter={(value) => <span style={{ color: '#94A3B8' }}>{value}</span>} />
+            <Legend iconType="circle" iconSize={8} wrapperStyle={{ fontSize: 11 }} formatter={(value) => <span style={{ color: '#6b6860' }}>{value}</span>} />
             {lines.map((l) => (
               <Line key={l.key} type="monotone" dataKey={l.key} name={l.name} stroke={l.color} strokeWidth={2} dot={false} />
             ))}

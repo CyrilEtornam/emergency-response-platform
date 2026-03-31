@@ -2,7 +2,7 @@ import React from 'react';
 import { PieChart, Pie, Cell, Tooltip, Legend, ResponsiveContainer } from 'recharts';
 import { EmptyState } from '../common/EmptyState';
 
-const DEFAULT_COLORS = ['#1D4ED8', '#D97706', '#DC2626', '#16A34A', '#7C3AED', '#EA580C'];
+const DEFAULT_COLORS = ['#4a9ee8', '#e8a82a', '#e84242', '#4caf6e', '#e8622a', '#6b6860'];
 
 /**
  * Donut/Pie chart for status or type breakdown.
@@ -37,14 +37,14 @@ export function AgencyPieChart({ data = [], colors = DEFAULT_COLORS, height = 22
           ))}
         </Pie>
         <Tooltip
-          contentStyle={{ background: '#1E293B', border: '1px solid #334155', borderRadius: '6px', color: '#F1F5F9' }}
+          contentStyle={{ background: '#333330', border: '1px solid #4a4a45', borderRadius: '6px', color: '#f0ede6' }}
           formatter={(value, name) => [value, name]}
         />
         <Legend
           iconType="circle"
           iconSize={8}
           wrapperStyle={{ fontSize: 11 }}
-          formatter={(value) => <span style={{ color: '#94A3B8' }}>{value}</span>}
+          formatter={(value) => <span style={{ color: '#6b6860' }}>{value}</span>}
         />
       </PieChart>
     </ResponsiveContainer>

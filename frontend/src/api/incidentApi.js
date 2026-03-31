@@ -67,3 +67,15 @@ export async function assignResponder(
   });
   return unwrap(res);
 }
+
+/**
+ * POST /incidents/:id/auto-dispatch
+ * Finds the nearest available responder and assigns them automatically.
+ * Returns { id, name, type, distanceKm, ... }
+ */
+export async function autoDispatch(incidentId) {
+  const res = await incidentAxios.post(
+    `/incidents/${incidentId}/auto-dispatch`,
+  );
+  return unwrap(res);
+}

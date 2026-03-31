@@ -6,25 +6,25 @@ const ToastContext = createContext(null);
 
 const VARIANT_STYLES = {
   success: {
-    border: 'border-l-4 border-[#16A34A]',
+    border: 'border-l-4 border-success',
     icon: (
-      <svg className="w-4 h-4 text-[#16A34A]" viewBox="0 0 20 20" fill="currentColor">
+      <svg className="w-4 h-4 text-success" viewBox="0 0 20 20" fill="currentColor">
         <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd"/>
       </svg>
     ),
   },
   error: {
-    border: 'border-l-4 border-[#DC2626]',
+    border: 'border-l-4 border-danger',
     icon: (
-      <svg className="w-4 h-4 text-[#DC2626]" viewBox="0 0 20 20" fill="currentColor">
+      <svg className="w-4 h-4 text-danger" viewBox="0 0 20 20" fill="currentColor">
         <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7 4a1 1 0 11-2 0 1 1 0 012 0zm-1-9a1 1 0 00-1 1v4a1 1 0 102 0V6a1 1 0 00-1-1z" clipRule="evenodd"/>
       </svg>
     ),
   },
   info: {
-    border: 'border-l-4 border-[#1D4ED8]',
+    border: 'border-l-4 border-info',
     icon: (
-      <svg className="w-4 h-4 text-[#1D4ED8]" viewBox="0 0 20 20" fill="currentColor">
+      <svg className="w-4 h-4 text-info" viewBox="0 0 20 20" fill="currentColor">
         <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clipRule="evenodd"/>
       </svg>
     ),
@@ -61,7 +61,7 @@ export function ToastProvider({ children }) {
             <RadixToast.Root
               key={id}
               className={clsx(
-                'bg-[#1E293B] border border-[#334155] rounded-[8px] shadow-md px-4 py-3',
+                'bg-surface border border-subtle rounded-[6px] px-4 py-3',
                 'flex items-start gap-3 w-80',
                 'data-[state=open]:animate-in data-[state=closed]:animate-out',
                 'data-[state=closed]:fade-out data-[state=open]:fade-in',
@@ -73,10 +73,10 @@ export function ToastProvider({ children }) {
               }}
             >
               <div className="mt-0.5 shrink-0">{style.icon}</div>
-              <RadixToast.Description className="text-sm text-[#F1F5F9] flex-1">
+              <RadixToast.Description className="text-[13px] text-primary flex-1">
                 {message}
               </RadixToast.Description>
-              <RadixToast.Close className="text-[#94A3B8] hover:text-[#F1F5F9] shrink-0">
+              <RadixToast.Close className="text-secondary hover:text-primary shrink-0 transition-colors">
                 <svg width="14" height="14" viewBox="0 0 14 14" fill="none">
                   <path d="M10.5 3.5L3.5 10.5M3.5 3.5l7 7" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round"/>
                 </svg>

@@ -12,16 +12,6 @@ export function VehicleMarker({ vehicle, onClick, isSelected }) {
 
   const iconUrl = VEHICLE_TYPE_TO_ICON[vehicle.type] || VEHICLE_TYPE_TO_ICON.AMBULANCE;
 
-  const icon = {
-    url: iconUrl,
-    scaledSize: window.google ? new window.google.maps.Size(32, 32) : undefined,
-    anchor: window.google ? new window.google.maps.Point(16, 16) : undefined,
-  };
-
-  if (label && window.google) {
-    icon.labelOrigin = new window.google.maps.Point(16, 0);
-  }
-
   const label =
     vehicle.status === 'EN_ROUTE'
       ? {
@@ -31,6 +21,16 @@ export function VehicleMarker({ vehicle, onClick, isSelected }) {
           fontWeight: '700',
         }
       : undefined;
+
+  const icon = {
+    url: iconUrl,
+    scaledSize: window.google ? new window.google.maps.Size(32, 32) : undefined,
+    anchor: window.google ? new window.google.maps.Point(16, 16) : undefined,
+  };
+
+  if (label && window.google) {
+    icon.labelOrigin = new window.google.maps.Point(16, 0);
+  }
 
   return (
     <Marker

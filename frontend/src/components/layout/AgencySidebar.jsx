@@ -1,6 +1,6 @@
 import React from 'react';
 import clsx from 'clsx';
-import { AGENCY_COLORS, ROLE_TO_AGENCY } from '../../utils/constants';
+import { ROLE_TO_AGENCY } from '../../utils/constants';
 import { useAuth } from '../../context/AuthContext';
 import { IncidentsTab } from '../../pages/agency/IncidentsTab';
 import { DispatchTab } from '../../pages/agency/DispatchTab';
@@ -33,36 +33,29 @@ export function AgencySidebar({
 }) {
   const { user } = useAuth();
   const agencyType = ROLE_TO_AGENCY[user?.role];
-  const agencyStyle = AGENCY_COLORS[agencyType] || { color: '#1D4ED8' };
 
   return (
-    <div className="flex flex-col h-full bg-[#1E293B] border-l border-[#334155]">
+    <div className="bg-surface border-l border-subtle h-full flex flex-col">
       {/* Tab bar */}
-      <div className="flex border-b border-[#334155] shrink-0">
+      <div className="bg-elevated border-b border-subtle flex shrink-0">
         {TABS.map((tab) => (
           <button
             key={tab.key}
             onClick={() => onTabChange(tab.key)}
             className={clsx(
-              'flex-1 py-3 text-sm font-medium transition-colors relative',
+              'flex-1 px-4 py-3 text-[13px] transition-colors relative',
               activeTab === tab.key
-                ? 'text-[#3B82F6]'
-                : 'text-[#94A3B8] hover:text-[#F1F5F9]'
+                ? 'text-accent border-b-2 border-accent font-medium'
+                : 'text-secondary hover:text-primary'
             )}
           >
             {tab.label}
-            {activeTab === tab.key && (
-              <span
-                className="absolute bottom-0 left-0 right-0 h-0.5"
-                style={{ backgroundColor: agencyStyle.color }}
-              />
-            )}
           </button>
         ))}
       </div>
 
       {/* Tab content */}
-      <div className="flex-1 overflow-y-auto scrollbar-thin">
+      <div className="flex-1 overflow-y-auto">
         {activeTab === 'incidents' && (
           <IncidentsTab
             incidents={incidents}
@@ -93,7 +86,7 @@ export function AgencySidebar({
             }}
           />
         )}
-        {activeTab === 'analytics' && <AnalyticsTab />}
+        {activeTab === 'analytics' && <AnalyticsTab agencyType={agencyType} />}
       </div>
     </div>
   );

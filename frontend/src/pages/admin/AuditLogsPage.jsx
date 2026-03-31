@@ -9,6 +9,8 @@ import logger from '../../utils/logger';
 
 const PAGE_SIZE = 50;
 
+const filterInputCls = 'px-3 py-2 text-[13px] bg-input border border-subtle text-primary placeholder:text-muted rounded-[4px] focus:outline-none focus:ring-1 focus:ring-accent';
+
 export function AuditLogsPage() {
   const [allLogs, setAllLogs] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -66,12 +68,12 @@ export function AuditLogsPage() {
     { key: 'userName', label: 'User', render: (v, row) => v || row.userFullName || '—' },
     { key: 'email', label: 'Email', render: (v, row) => v || row.userEmail || '—' },
     { key: 'action', label: 'Action', render: (v, row) => (
-      <span className="font-mono text-xs bg-[#0F172A] border border-[#334155] text-[#94A3B8] px-2 py-0.5 rounded">
+      <span className="font-mono text-[11px] bg-input border border-subtle text-secondary px-2 py-0.5 rounded-[4px]">
         {v || row.actionType || '—'}
       </span>
     )},
     { key: 'ipAddress', label: 'IP Address', render: (v) => (
-      <span className="text-[#94A3B8] font-mono text-xs">{v || '—'}</span>
+      <span className="text-secondary font-mono text-[12px]">{v || '—'}</span>
     )},
   ];
 
@@ -79,8 +81,8 @@ export function AuditLogsPage() {
     <div className="p-6">
       <div className="flex items-center justify-between mb-5">
         <div>
-          <h1 className="text-xl font-semibold text-[#F1F5F9]">Audit Logs</h1>
-          <p className="text-sm text-[#94A3B8] mt-0.5">{filtered.length} records</p>
+          <h1 className="text-[20px] font-semibold text-primary">Audit Logs</h1>
+          <p className="text-[13px] text-secondary mt-0.5">{filtered.length} records</p>
         </div>
         <Button variant="secondary" onClick={handleExport}>
           Export CSV
@@ -94,12 +96,12 @@ export function AuditLogsPage() {
           placeholder="Search by user or email..."
           value={search}
           onChange={(e) => setSearch(e.target.value)}
-          className="flex-1 min-w-[180px] px-3 py-2 text-sm bg-[#0F172A] border border-[#334155] text-[#F1F5F9] placeholder:text-[#94A3B8] rounded focus:outline-none focus:ring-2 focus:ring-[#3B82F6]"
+          className={`flex-1 min-w-[180px] ${filterInputCls}`}
         />
         <select
           value={actionFilter}
           onChange={(e) => setActionFilter(e.target.value)}
-          className="px-3 py-2 text-sm bg-[#0F172A] border border-[#334155] text-[#F1F5F9] rounded focus:outline-none focus:ring-2 focus:ring-[#3B82F6]"
+          className={`${filterInputCls} appearance-none`}
         >
           <option value="">All actions</option>
           {uniqueActions.map((a) => <option key={a} value={a}>{a}</option>)}
@@ -108,13 +110,13 @@ export function AuditLogsPage() {
           type="date"
           value={startDate}
           onChange={(e) => setStartDate(e.target.value)}
-          className="px-3 py-2 text-sm bg-[#0F172A] border border-[#334155] text-[#F1F5F9] rounded focus:outline-none focus:ring-2 focus:ring-[#3B82F6]"
+          className={filterInputCls}
         />
         <input
           type="date"
           value={endDate}
           onChange={(e) => setEndDate(e.target.value)}
-          className="px-3 py-2 text-sm bg-[#0F172A] border border-[#334155] text-[#F1F5F9] rounded focus:outline-none focus:ring-2 focus:ring-[#3B82F6]"
+          className={filterInputCls}
         />
         {(search || actionFilter || startDate || endDate) && (
           <Button
@@ -128,7 +130,7 @@ export function AuditLogsPage() {
       </div>
 
       {error && (
-        <div className="mb-4 p-3 bg-[#1E293B] border border-[#DC2626]/50 rounded text-sm text-[#F87171]">
+        <div className="mb-4 p-3 bg-surface border border-danger/30 rounded-[4px] text-[13px] text-danger">
           {error}
         </div>
       )}

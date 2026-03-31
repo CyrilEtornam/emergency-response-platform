@@ -1,39 +1,55 @@
 export const SEVERITY_COLORS = {
   CRITICAL: {
-    bg: "#FEE2E2",
-    text: "#DC2626",
-    border: "#DC2626",
-    mapColor: "#DC2626",
+    bg: "rgba(232,66,66,0.15)",
+    text: "#e84242",
+    border: "#e84242",
+    mapColor: "#e84242",
     scale: 16,
   },
   HIGH: {
-    bg: "#FFEDD5",
-    text: "#EA580C",
-    border: "#EA580C",
-    mapColor: "#EA580C",
+    bg: "rgba(232,98,42,0.15)",
+    text: "#e8622a",
+    border: "#e8622a",
+    mapColor: "#e8622a",
     scale: 13,
   },
   MEDIUM: {
-    bg: "#FEF3C7",
-    text: "#D97706",
-    border: "#D97706",
-    mapColor: "#D97706",
+    bg: "rgba(232,168,42,0.15)",
+    text: "#e8a82a",
+    border: "#e8a82a",
+    mapColor: "#e8a82a",
     scale: 11,
   },
   LOW: {
-    bg: "#DCFCE7",
-    text: "#16A34A",
-    border: "#16A34A",
-    mapColor: "#16A34A",
+    bg: "rgba(76,175,110,0.15)",
+    text: "#4caf6e",
+    border: "#4caf6e",
+    mapColor: "#4caf6e",
     scale: 9,
   },
 };
 
 export const AGENCY_COLORS = {
-  MEDICAL: { color: "#2563EB", bg: "#DBEAFE", label: "Hospital Services" },
-  HOSPITAL: { color: "#2563EB", bg: "#DBEAFE", label: "Hospital Services" },
-  POLICE: { color: "#D97706", bg: "#FEF3C7", label: "Police Services" },
-  FIRE: { color: "#DC2626", bg: "#FEE2E2", label: "Fire Services" },
+  MEDICAL: {
+    color: "#4a9ee8",
+    bg: "rgba(74,158,232,0.15)",
+    label: "Hospital Services",
+  },
+  HOSPITAL: {
+    color: "#4a9ee8",
+    bg: "rgba(74,158,232,0.15)",
+    label: "Hospital Services",
+  },
+  POLICE: {
+    color: "#e8a82a",
+    bg: "rgba(232,168,42,0.15)",
+    label: "Police Services",
+  },
+  FIRE: {
+    color: "#e84242",
+    bg: "rgba(232,66,66,0.15)",
+    label: "Fire Services",
+  },
 };
 
 export const ROLE_TO_AGENCY = {
@@ -63,6 +79,8 @@ export const VEHICLE_STATUSES = [
   "EN_ROUTE",
   "ON_SCENE",
   "RETURNING",
+  "OFFLINE",
+  "MAINTENANCE",
 ];
 
 export const VEHICLE_TYPE_TO_ICON = {
@@ -74,15 +92,15 @@ export const VEHICLE_TYPE_TO_ICON = {
 export const SEVERITY_LEVELS = ["LOW", "MEDIUM", "HIGH", "CRITICAL"];
 
 export const STATUS_COLORS = {
-  REPORTED: { bg: "#EFF6FF", text: "#2563EB" },
-  ASSIGNED: { bg: "#FEF3C7", text: "#D97706" },
-  EN_ROUTE: { bg: "#FFEDD5", text: "#EA580C" },
-  RESOLVED: { bg: "#DCFCE7", text: "#16A34A" },
-  AVAILABLE: { bg: "#DCFCE7", text: "#16A34A" },
-  ON_SCENE: { bg: "#FEE2E2", text: "#DC2626" },
-  RETURNING: { bg: "#F3E8FF", text: "#7C3AED" },
-  ACTIVE: { bg: "#FEE2E2", text: "#DC2626" },
-  INACTIVE: { bg: "#F3F4F6", text: "#6B7280" },
+  REPORTED: { bg: "rgba(232,168,42,0.15)", text: "#e8a82a" },
+  ASSIGNED: { bg: "rgba(232,168,42,0.15)", text: "#e8a82a" },
+  EN_ROUTE: { bg: "rgba(74,158,232,0.15)", text: "#4a9ee8" },
+  RESOLVED: { bg: "rgba(76,175,110,0.15)", text: "#4caf6e" },
+  AVAILABLE: { bg: "rgba(76,175,110,0.15)", text: "#4caf6e" },
+  ON_SCENE: { bg: "rgba(232,66,66,0.15)", text: "#e84242" },
+  RETURNING: { bg: "rgba(74,158,232,0.15)", text: "#4a9ee8" },
+  ACTIVE: { bg: "rgba(74,158,232,0.15)", text: "#4a9ee8" },
+  INACTIVE: { bg: "rgba(90,90,84,0.2)", text: "#6b6860" },
 };
 
 // Ghana map configuration - center point and default zoom

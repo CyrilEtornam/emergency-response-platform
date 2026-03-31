@@ -184,7 +184,8 @@ public class AnalyticsService {
         }).toList();
     }
 
-    // ─── Response times ───────────────────────────────────────────────────────────
+    // ─── Response times
+    // ───────────────────────────────────────────────────────────
     /**
      * GET /analytics/response-times
      * Returns: { avgSeconds: number, byRegion: [...], byType: [...] }
@@ -196,47 +197,47 @@ public class AnalyticsService {
 
         // Calculate from incidents table directly (fallback)
         String avgSecondsQuery = """
-            SELECT COALESCE(AVG(EXTRACT(EPOCH FROM (updated_at - created_at))), 0)
-            FROM incidents
-            WHERE status = 'RESOLVED'
-              AND updated_at > created_at
-              %s
-            """.formatted(typeClause);
+                SELECT COALESCE(AVG(EXTRACT(EPOCH FROM (updated_at - created_at))), 0)
+                FROM incidents
+                WHERE status = 'RESOLVED'
+                  AND updated_at > created_at
+                  %s
+                """.formatted(typeClause);
         Double avgSeconds = jdbc.queryForObject(avgSecondsQuery, Double.class);
 
         // By region - extract approximate region from lat/lng buckets
         String byRegionQuery = """
-            SELECT 
-                CASE 
-                    WHEN latitude BETWEEN 5.5 AND 5.8 AND longitude BETWEEN -0.3 AND 0.0 THEN 'Greater Accra'
-                    WHEN latitude BETWEEN 6.5 AND 7.0 AND longitude BETWEEN -1.7 AND -1.5 THEN 'Ashanti'
-                    WHEN latitude BETWEEN 9.2 AND 9.6 AND longitude BETWEEN -0.9 AND -0.7 THEN 'Northern'
-                    WHEN latitude BETWEEN 5.0 AND 5.3 AND longitude BETWEEN -1.3 AND -1.1 THEN 'Central'
-                    WHEN latitude BETWEEN 4.7 AND 5.0 AND longitude BETWEEN -1.9 AND -1.6 THEN 'Western'
-                    WHEN latitude BETWEEN 6.0 AND 6.2 AND longitude BETWEEN -0.4 AND -0.1 THEN 'Eastern'
-                    WHEN latitude BETWEEN 6.5 AND 6.7 AND longitude BETWEEN 0.3 AND 0.6 THEN 'Volta'
-                    ELSE 'Other'
-                END AS region,
-                COALESCE(AVG(EXTRACT(EPOCH FROM (updated_at - created_at))), 0) AS avg_seconds
-            FROM incidents
-            WHERE status = 'RESOLVED'
-              AND updated_at > created_at
-              %s
-            GROUP BY region
-            ORDER BY avg_seconds ASC
-            """.formatted(typeClause);
+                SELECT
+                    CASE
+                        WHEN latitude BETWEEN 5.5 AND 5.8 AND longitude BETWEEN -0.3 AND 0.0 THEN 'Greater Accra'
+                        WHEN latitude BETWEEN 6.5 AND 7.0 AND longitude BETWEEN -1.7 AND -1.5 THEN 'Ashanti'
+                        WHEN latitude BETWEEN 9.2 AND 9.6 AND longitude BETWEEN -0.9 AND -0.7 THEN 'Northern'
+                        WHEN latitude BETWEEN 5.0 AND 5.3 AND longitude BETWEEN -1.3 AND -1.1 THEN 'Central'
+                        WHEN latitude BETWEEN 4.7 AND 5.0 AND longitude BETWEEN -1.9 AND -1.6 THEN 'Western'
+                        WHEN latitude BETWEEN 6.0 AND 6.2 AND longitude BETWEEN -0.4 AND -0.1 THEN 'Eastern'
+                        WHEN latitude BETWEEN 6.5 AND 6.7 AND longitude BETWEEN 0.3 AND 0.6 THEN 'Volta'
+                        ELSE 'Other'
+                    END AS region,
+                    COALESCE(AVG(EXTRACT(EPOCH FROM (updated_at - created_at))), 0) AS avg_seconds
+                FROM incidents
+                WHERE status = 'RESOLVED'
+                  AND updated_at > created_at
+                  %s
+                GROUP BY region
+                ORDER BY avg_seconds ASC
+                """.formatted(typeClause);
         List<Map<String, Object>> byRegion = jdbc.queryForList(byRegionQuery);
 
         // By type
         String byTypeQuery = """
-            SELECT type, COALESCE(AVG(EXTRACT(EPOCH FROM (updated_at - created_at))), 0) AS avg_seconds
-            FROM incidents
-            WHERE status = 'RESOLVED'
-              AND updated_at > created_at
-              %s
-            GROUP BY type
-            ORDER BY type
-            """.formatted(typeClause);
+                SELECT type, COALESCE(AVG(EXTRACT(EPOCH FROM (updated_at - created_at))), 0) AS avg_seconds
+                FROM incidents
+                WHERE status = 'RESOLVED'
+                  AND updated_at > created_at
+                  %s
+                GROUP BY type
+                ORDER BY type
+                """.formatted(typeClause);
         List<Map<String, Object>> byType = jdbc.queryForList(byTypeQuery);
 
         Map<String, Object> result = new LinkedHashMap<>();
@@ -249,20 +250,24 @@ public class AnalyticsService {
     // ─── Incidents list (enhanced) ────────────────────────────────────────────
     /**
      * GET /analytics/incidents
-     * Supports optional filters: type, region, dateFrom, dateTo, agency, status, severity, limit
+     * Supports optional filters: type, region, dateFrom, dateTo, agency, status,
+     * severity, limit
      */
-    public List<Map<String, Object>> getIncidents(String type, String region, String dateFrom, 
-                                                   String dateTo, String agency, String status,
-                                                   String severity, int limit) {
+    public List<Map<String, Object>> getIncidents(String type, String region, String dateFrom,
+            String dateTo, String agency, String status,
+            String severity, int limit) {
         List<String> clauses = new ArrayList<>();
-        
+
         // Type filter (can come from 'type' or 'agency' param)
         String typeFilter = type != null ? type.toUpperCase() : agencyToType(agency);
-        if (typeFilter != null) clauses.add("type = '" + typeFilter + "'");
-        
-        if (status != null && !status.isBlank()) clauses.add("status = '" + status.toUpperCase() + "'");
-        if (severity != null && !severity.isBlank()) clauses.add("severity = '" + severity.toUpperCase() + "'");
-        
+        if (typeFilter != null)
+            clauses.add("type = '" + typeFilter + "'");
+
+        if (status != null && !status.isBlank())
+            clauses.add("status = '" + status.toUpperCase() + "'");
+        if (severity != null && !severity.isBlank())
+            clauses.add("severity = '" + severity.toUpperCase() + "'");
+
         // Date range filters
         if (dateFrom != null && !dateFrom.isBlank()) {
             clauses.add("DATE(created_at) >= DATE('" + dateFrom + "')");
@@ -270,7 +275,7 @@ public class AnalyticsService {
         if (dateTo != null && !dateTo.isBlank()) {
             clauses.add("DATE(created_at) <= DATE('" + dateTo + "')");
         }
-        
+
         // Region filter - approximate based on coordinates
         if (region != null && !region.isBlank()) {
             String regionClause = switch (region) {
@@ -293,9 +298,12 @@ public class AnalyticsService {
         return jdbc.queryForList(sql).stream().map(r -> {
             Map<String, Object> m = new LinkedHashMap<>(r);
             // Convert timestamps to ISO strings
-            if (r.get("created_at") != null) m.put("createdAt", r.get("created_at").toString());
-            if (r.get("updated_at") != null) m.put("updatedAt", r.get("updated_at").toString());
-            if (r.get("reported_by") != null) m.put("reportedBy", r.get("reported_by"));
+            if (r.get("created_at") != null)
+                m.put("createdAt", r.get("created_at").toString());
+            if (r.get("updated_at") != null)
+                m.put("updatedAt", r.get("updated_at").toString());
+            if (r.get("reported_by") != null)
+                m.put("reportedBy", r.get("reported_by"));
             return m;
         }).toList();
     }

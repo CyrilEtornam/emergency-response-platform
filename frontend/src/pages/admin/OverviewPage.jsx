@@ -17,30 +17,30 @@ const AGENCIES = [
 
 function AgencyCard({ agency, data }) {
   const navigate = useNavigate();
-  const style = AGENCY_COLORS[agency.key] || { color: '#6B7280', bg: '#F3F4F6' };
+  const style = AGENCY_COLORS[agency.key] || { color: '#a09d96' };
 
   return (
     <Card className="p-5 flex flex-col gap-3">
       <div className="flex items-center gap-2">
         <span className="w-3 h-3 rounded-full shrink-0" style={{ backgroundColor: style.color }} />
-        <span className="text-sm font-semibold text-[#F1F5F9]">{agency.label}</span>
+        <span className="text-[13px] font-semibold text-primary">{agency.label}</span>
       </div>
       <div className="grid grid-cols-3 gap-3 text-center">
         <div>
-          <p className="text-xl font-semibold text-[#F1F5F9]">{data?.activeIncidents ?? '—'}</p>
-          <p className="text-xs text-[#94A3B8]">Active</p>
+          <p className="text-[22px] font-semibold text-primary leading-none">{data?.activeIncidents ?? '—'}</p>
+          <p className="text-[11px] text-secondary mt-1">Active</p>
         </div>
         <div>
-          <p className="text-xl font-semibold text-[#F1F5F9]">
+          <p className="text-[22px] font-semibold text-primary leading-none">
             {data?.vehiclesDeployed ?? '—'}/{data?.totalVehicles ?? '—'}
           </p>
-          <p className="text-xs text-[#94A3B8]">Vehicles</p>
+          <p className="text-[11px] text-secondary mt-1">Vehicles</p>
         </div>
         <div>
-          <p className="text-xl font-semibold text-[#F1F5F9]">
+          <p className="text-[22px] font-semibold text-primary leading-none">
             {data?.avgResponseTime != null ? `${Math.round(data.avgResponseTime)}m` : '—'}
           </p>
-          <p className="text-xs text-[#94A3B8]">Avg resp.</p>
+          <p className="text-[11px] text-secondary mt-1">Avg resp.</p>
         </div>
       </div>
       <Button
@@ -58,22 +58,22 @@ function AgencyCard({ agency, data }) {
 function ActivityFeed({ items, loading }) {
   if (loading) return <div className="flex justify-center py-8"><Spinner /></div>;
   if (!items.length) {
-    return <p className="text-sm text-[#94A3B8] text-center py-8">No recent activity</p>;
+    return <p className="text-[13px] text-secondary text-center py-8">No recent activity</p>;
   }
   return (
-    <div className="divide-y divide-[#334155]">
+    <div className="divide-y divide-subtle">
       {items.map((item, i) => (
         <div key={item.id || i} className="flex items-start gap-3 px-5 py-3">
           <div
             className="w-2 h-2 rounded-full mt-2 shrink-0"
-            style={{ backgroundColor: AGENCY_COLORS[item.type]?.color || '#94A3B8' }}
+            style={{ backgroundColor: AGENCY_COLORS[item.type]?.color || '#a09d96' }}
           />
           <div className="flex-1 min-w-0">
-            <p className="text-sm text-[#F1F5F9] truncate">
+            <p className="text-[13px] text-primary truncate">
               <span className="font-medium">{item.type}</span>
               {item.description && ` — ${item.description.slice(0, 60)}`}
             </p>
-            <p className="text-xs text-[#94A3B8]">{formatTimeAgo(item.createdAt || item.reportedAt)}</p>
+            <p className="text-[12px] text-secondary">{formatTimeAgo(item.createdAt || item.reportedAt)}</p>
           </div>
           <Badge variant="status" value={item.status} />
         </div>
@@ -112,7 +112,7 @@ export function OverviewPage() {
     <div className="p-6 space-y-6">
       {/* Page header */}
       <div className="flex items-center justify-between">
-        <h1 className="text-xl font-semibold text-[#F1F5F9]">System Overview</h1>
+        <h1 className="text-[20px] font-semibold text-primary">System Overview</h1>
       </div>
 
       {/* Top stats */}
@@ -145,7 +145,7 @@ export function OverviewPage() {
 
       {/* Agency cards */}
       <div>
-        <h2 className="text-sm font-semibold text-[#F1F5F9] mb-3">Agency Summary</h2>
+        <h2 className="text-[13px] font-semibold text-primary mb-3">Agency Summary</h2>
         <div className="grid grid-cols-3 gap-4">
           {AGENCIES.map((agency) => (
             <AgencyCard
@@ -159,9 +159,9 @@ export function OverviewPage() {
 
       {/* Activity feed */}
       <Card>
-        <div className="flex items-center justify-between px-5 py-4 border-b border-[#334155]">
-          <h2 className="text-sm font-semibold text-[#F1F5F9]">Recent Activity</h2>
-          <span className="text-xs text-[#94A3B8]">Auto-refreshes every 30s</span>
+        <div className="flex items-center justify-between px-5 py-4 border-b border-subtle">
+          <h2 className="text-[13px] font-semibold text-primary">Recent Activity</h2>
+          <span className="text-[12px] text-secondary">Auto-refreshes every 30s</span>
         </div>
         <ActivityFeed items={activity} loading={activityLoading} />
       </Card>

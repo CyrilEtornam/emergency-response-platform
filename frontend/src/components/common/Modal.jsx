@@ -25,25 +25,25 @@ export function Modal({
         <Dialog.Content
           className={clsx(
             'fixed left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 z-50',
-            'bg-[#1E293B] border border-[#334155] rounded-[8px] shadow-lg w-full',
+            'bg-surface border border-subtle rounded-[8px] w-full',
             'focus:outline-none',
             sizeClass
           )}
         >
           {/* Header */}
-          <div className="px-6 py-4 border-b border-[#334155] flex items-center justify-between">
+          <div className="px-6 py-4 border-b border-subtle flex items-center justify-between">
             <div>
-              <Dialog.Title className="text-base font-semibold text-[#F1F5F9]">
+              <Dialog.Title className="text-[17px] font-semibold text-primary">
                 {title}
               </Dialog.Title>
               {description && (
-                <Dialog.Description className="text-sm text-[#94A3B8] mt-0.5">
+                <Dialog.Description className="text-[13px] text-secondary mt-0.5">
                   {description}
                 </Dialog.Description>
               )}
             </div>
             <Dialog.Close asChild>
-              <button className="text-[#94A3B8] hover:text-[#F1F5F9] transition-colors p-1 -mr-1 rounded">
+              <button className="text-secondary hover:text-primary transition-colors p-1 -mr-1 rounded-[4px]">
                 <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
                   <path d="M12 4L4 12M4 4l8 8" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round"/>
                 </svg>
@@ -56,7 +56,7 @@ export function Modal({
 
           {/* Footer */}
           {footer && (
-            <div className="px-6 py-4 border-t border-[#334155] flex items-center justify-end gap-3">
+            <div className="px-6 py-4 border-t border-subtle flex items-center justify-end gap-3">
               {footer}
             </div>
           )}
@@ -85,7 +85,7 @@ export function ConfirmDialog({ open, onOpenChange, title, description, onConfir
         </>
       }
     >
-      <p className="text-sm text-[#94A3B8]">This action cannot be undone.</p>
+      <p className="text-[13px] text-secondary">This action cannot be undone.</p>
     </Modal>
   );
 }

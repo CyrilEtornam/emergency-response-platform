@@ -14,7 +14,7 @@ function FilterPanel({ agencyFilters, onAgencyToggle, showIncidents, showVehicle
   return (
     <div className="absolute top-3 right-3 z-10 w-56">
       <Card className="p-4">
-        <p className="text-xs font-medium uppercase tracking-widest text-[#94A3B8] mb-3">Agency Filters</p>
+        <p className="text-[11px] font-medium uppercase tracking-widest text-secondary mb-3">Agency Filters</p>
         <div className="space-y-2 mb-4">
           {Object.entries(AGENCY_COLORS).filter(([k]) => ['MEDICAL', 'POLICE', 'FIRE'].includes(k)).map(([key, style]) => (
             <label key={key} className="flex items-center gap-2.5 cursor-pointer">
@@ -22,29 +22,29 @@ function FilterPanel({ agencyFilters, onAgencyToggle, showIncidents, showVehicle
                 type="checkbox"
                 checked={agencyFilters[key] !== false}
                 onChange={() => onAgencyToggle(key)}
-                className="rounded border-[#334155]"
+                className="rounded border-subtle"
               />
               <span className="w-2.5 h-2.5 rounded-full shrink-0" style={{ backgroundColor: style.color }} />
-              <span className="text-sm text-[#F1F5F9]">{style.label}</span>
+              <span className="text-[13px] text-primary">{style.label}</span>
             </label>
           ))}
         </div>
 
-        <p className="text-xs font-medium uppercase tracking-widest text-[#94A3B8] mb-2">Show</p>
+        <p className="text-[11px] font-medium uppercase tracking-widest text-secondary mb-2">Show</p>
         <div className="space-y-2 mb-3">
           <label className="flex items-center gap-2.5 cursor-pointer">
-            <input type="checkbox" checked={showIncidents} onChange={onToggleIncidents} className="rounded border-[#334155]" />
-            <span className="text-sm text-[#F1F5F9]">Incidents</span>
+            <input type="checkbox" checked={showIncidents} onChange={onToggleIncidents} className="rounded border-subtle" />
+            <span className="text-[13px] text-primary">Incidents</span>
           </label>
           <label className="flex items-center gap-2.5 cursor-pointer">
-            <input type="checkbox" checked={showVehicles} onChange={onToggleVehicles} className="rounded border-[#334155]" />
-            <span className="text-sm text-[#F1F5F9]">Vehicles</span>
+            <input type="checkbox" checked={showVehicles} onChange={onToggleVehicles} className="rounded border-subtle" />
+            <span className="text-[13px] text-primary">Vehicles</span>
           </label>
         </div>
 
-        <div className="pt-3 border-t border-[#334155] flex items-center justify-between">
-          <span className="text-xs text-[#94A3B8]">Live incidents</span>
-          <span className="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-[#1E293B] text-[#94A3B8]">
+        <div className="pt-3 border-t border-subtle flex items-center justify-between">
+          <span className="text-[12px] text-secondary">Live incidents</span>
+          <span className="inline-flex items-center px-2 py-0.5 rounded-full text-[11px] font-medium bg-elevated text-secondary">
             {incidentCount}
           </span>
         </div>
@@ -63,16 +63,16 @@ function IncidentInfoPanel({ incident, onClose }) {
             <Badge variant="agency" value={incident.type} />
             <Badge variant="severity" value={incident.severity} />
           </div>
-          <button onClick={onClose} className="text-[#94A3B8] hover:text-[#F1F5F9]">
+          <button onClick={onClose} className="text-secondary hover:text-primary transition-colors">
             <svg width="14" height="14" viewBox="0 0 14 14" fill="none">
               <path d="M10.5 3.5L3.5 10.5M3.5 3.5l7 7" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round"/>
             </svg>
           </button>
         </div>
-        <p className="text-sm text-[#F1F5F9] mb-1">{incident.description?.slice(0, 80)}</p>
-        {incident.address && <p className="text-xs text-[#94A3B8] mb-2">{incident.address}</p>}
+        <p className="text-[13px] text-primary mb-1">{incident.description?.slice(0, 80)}</p>
+        {incident.address && <p className="text-[12px] text-secondary mb-2">{incident.address}</p>}
         <div className="flex items-center justify-between">
-          <span className="text-xs text-[#94A3B8]">{formatTimeAgo(incident.createdAt)}</span>
+          <span className="text-[12px] text-secondary">{formatTimeAgo(incident.createdAt)}</span>
           <Badge variant="status" value={incident.status} />
         </div>
       </Card>
