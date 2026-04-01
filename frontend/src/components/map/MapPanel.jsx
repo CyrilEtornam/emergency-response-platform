@@ -2,9 +2,7 @@ import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import {
   GoogleMap,
   StandaloneSearchBox,
-  DirectionsRenderer,
-  Polygon,
-  OverlayView,
+  DirectionsRenderer
 } from '@react-google-maps/api';
 import { MarkerClusterer } from '@googlemaps/markerclusterer';
 
@@ -13,7 +11,6 @@ import { VehicleMarker } from './VehicleMarker';
 import { IncidentInfoWindow } from './IncidentInfoWindow';
 import { GHANA_CENTER, DEFAULT_ZOOM } from '../../utils/constants';
 import { Spinner } from '../common/Spinner';
-import ghanaRegions from '../../data/ghanaRegions';
 import { PulseOverlay } from './PulseOverlay';
 import { getIncidentIcon } from './IncidentMarker';
 
@@ -51,15 +48,6 @@ const MAP_OPTIONS = {
 
 const containerStyle = { width: '100%', height: '100%' };
 
-const regionPolygonOptions = (color) => ({
-  strokeColor: color,
-  strokeOpacity: 0.6,
-  strokeWeight: 1.5,
-  fillColor: color,
-  fillOpacity: 0.06,
-  clickable: true,
-  zIndex: 1,
-});
 
 const severityColors = {
   CRITICAL: '#e84242',
@@ -94,7 +82,6 @@ export function MapPanel({
   const [isLoaded, setIsLoaded] = useState(false);
   const [directions, setDirections] = useState(null);
   const [zoomLevel, setZoomLevel] = useState(DEFAULT_ZOOM);
-  const [regionLabel, setRegionLabel] = useState(null);
 
   const onLoad = useCallback((map) => {
     mapRef.current = map;
@@ -162,7 +149,6 @@ export function MapPanel({
   );
 
   const handleMapClick = useCallback((e) => {
-    setRegionLabel(null);
     if (isReportTab && onMapClick) {
       onMapClick({ lat: e.latLng.lat(), lng: e.latLng.lng() });
     }
@@ -184,13 +170,6 @@ export function MapPanel({
     return agencyFilters[v.agencyType || v.type] !== false;
   }), [vehicles, showVehicles, agencyFilters]);
 
-  const handleRegionClick = useCallback((region, e) => {
-    const lat = e?.latLng?.lat?.();
-    const lng = e?.latLng?.lng?.();
-    if (lat == null || lng == null) return;
-    setRegionLabel({ name: region.name, position: { lat, lng } });
-    onRegionClick?.(region.name);
-  }, [onRegionClick]);
 
   const clearClusterer = useCallback(() => {
     clustererRef.current?.clearMarkers();
