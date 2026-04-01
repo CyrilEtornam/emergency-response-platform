@@ -42,7 +42,7 @@ public class AnalyticsController {
     }
 
     @GetMapping("/cross-agency")
-    public ResponseEntity<List<Map<String, Object>>> crossAgency() {
+    public ResponseEntity<Map<String, Object>> crossAgency() {
         return ResponseEntity.ok(service.getCrossAgency());
     }
 

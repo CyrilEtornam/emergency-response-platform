@@ -91,6 +91,24 @@ public class AnalyticsService {
         result.put("byType", byType);
         result.put("bySeverity", bySeverity);
         result.put("byStatus", byStatus);
+
+        // Per-agency breakdown for OverviewPage agency cards
+        Map<String, Object> agencies = new LinkedHashMap<>();
+        for (String agType : List.of("MEDICAL", "POLICE", "FIRE")) {
+            long agActive   = count("SELECT COUNT(*) FROM incidents WHERE type = '" + agType + "' AND status != 'RESOLVED'");
+            long agDeployed = count("SELECT COUNT(DISTINCT vehicle_id) FROM incidents WHERE type = '" + agType + "' AND status IN ('ASSIGNED','EN_ROUTE') AND vehicle_id IS NOT NULL");
+            Double agAvg    = jdbc.queryForObject(
+                "SELECT COALESCE(ROUND(AVG(EXTRACT(EPOCH FROM (updated_at - created_at)) / 60)::numeric, 1), 0) " +
+                "FROM incidents WHERE type = '" + agType + "' AND status = 'RESOLVED' AND updated_at > created_at",
+                Double.class);
+            Map<String, Object> a = new LinkedHashMap<>();
+            a.put("activeIncidents",        agActive);
+            a.put("vehiclesDeployed",       agDeployed);
+            a.put("avgResponseTimeMinutes", agAvg != null ? agAvg : 0.0);
+            a.put("totalVehicles",          0);
+            agencies.put(agType, a);
+        }
+        result.put("agencies", agencies);
         return result;
     }
 
@@ -162,26 +180,78 @@ public class AnalyticsService {
 
     // ─── Cross-agency stats ───────────────────────────────────────────────────
 
-    public List<Map<String, Object>> getCrossAgency() {
-        String sql = """
-                SELECT type,
-                       COUNT(*) AS total,
-                       SUM(CASE WHEN status = 'RESOLVED' THEN 1 ELSE 0 END) AS resolved,
-                       SUM(CASE WHEN severity = 'CRITICAL' THEN 1 ELSE 0 END) AS critical
+    public Map<String, Object> getCrossAgency() {
+        // 1. Daily incidents per agency type for last 30 days
+        List<Map<String, Object>> daily = jdbc.queryForList("""
+                SELECT DATE(created_at) AS date,
+                       SUM(CASE WHEN type = 'MEDICAL' THEN 1 ELSE 0 END) AS medical,
+                       SUM(CASE WHEN type = 'POLICE'  THEN 1 ELSE 0 END) AS police,
+                       SUM(CASE WHEN type = 'FIRE'    THEN 1 ELSE 0 END) AS fire
                 FROM incidents
-                GROUP BY type
-                ORDER BY type
-                """;
-
-        return jdbc.queryForList(sql).stream().map(r -> {
+                WHERE created_at >= NOW() - INTERVAL '30 days'
+                GROUP BY DATE(created_at)
+                ORDER BY DATE(created_at) ASC
+                """).stream().map(r -> {
             Map<String, Object> m = new LinkedHashMap<>();
-            m.put("agency", typeToAgency((String) r.get("type")));
-            m.put("type", r.get("type"));
-            m.put("total", r.get("total"));
-            m.put("resolved", r.get("resolved"));
-            m.put("critical", r.get("critical"));
+            m.put("date",    r.get("date").toString());
+            m.put("medical", r.get("medical"));
+            m.put("police",  r.get("police"));
+            m.put("fire",    r.get("fire"));
             return m;
         }).toList();
+
+        // 2. Cumulative incidents per day (running total)
+        List<Map<String, Object>> cumulative = jdbc.queryForList("""
+                SELECT date,
+                       SUM(cnt) OVER (ORDER BY date ROWS BETWEEN UNBOUNDED PRECEDING AND CURRENT ROW) AS count
+                FROM (
+                    SELECT DATE(created_at) AS date, COUNT(*) AS cnt
+                    FROM incidents
+                    WHERE created_at >= NOW() - INTERVAL '30 days'
+                    GROUP BY DATE(created_at)
+                ) sub
+                ORDER BY date ASC
+                """).stream().map(r -> {
+            Map<String, Object> m = new LinkedHashMap<>();
+            m.put("date",  r.get("date").toString());
+            m.put("count", r.get("count"));
+            return m;
+        }).toList();
+
+        // 3. Incidents by approximate region
+        List<Map<String, Object>> byRegion = getByRegion(null).stream().map(r -> {
+            Map<String, Object> m = new LinkedHashMap<>();
+            m.put("region", r.get("latitude") + ", " + r.get("longitude"));
+            m.put("count",  r.get("count"));
+            return m;
+        }).toList();
+
+        // 4. Totals per agency type
+        Map<String, Object> totals = jdbc.queryForMap("""
+                SELECT SUM(CASE WHEN type = 'MEDICAL' THEN 1 ELSE 0 END) AS medical,
+                       SUM(CASE WHEN type = 'POLICE'  THEN 1 ELSE 0 END) AS police,
+                       SUM(CASE WHEN type = 'FIRE'    THEN 1 ELSE 0 END) AS fire
+                FROM incidents
+                """);
+
+        // 5. Fastest and worst response times (minutes)
+        Map<String, Object> respStats = jdbc.queryForMap("""
+                SELECT COALESCE(ROUND(MIN(EXTRACT(EPOCH FROM (updated_at - created_at)) / 60)::numeric, 1), 0) AS fastest,
+                       COALESCE(ROUND(MAX(EXTRACT(EPOCH FROM (updated_at - created_at)) / 60)::numeric, 1), 0) AS worst
+                FROM incidents
+                WHERE status = 'RESOLVED' AND updated_at > created_at
+                """);
+
+        Map<String, Object> result = new LinkedHashMap<>();
+        result.put("daily",           daily);
+        result.put("cumulative",      cumulative);
+        result.put("byRegion",        byRegion);
+        result.put("totalMedical",    totals.get("medical"));
+        result.put("totalPolice",     totals.get("police"));
+        result.put("totalFire",       totals.get("fire"));
+        result.put("fastestResponse", respStats.get("fastest"));
+        result.put("worstResponse",   respStats.get("worst"));
+        return result;
     }
 
     // ─── Response times

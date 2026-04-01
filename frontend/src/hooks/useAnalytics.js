@@ -48,17 +48,18 @@ export function useAnalytics({ dateRange = "7d", agencyType } = {}) {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
-  const params = { dateRange, ...(agencyType ? { type: agencyType } : {}) };
+  const days = parseInt(dateRange) || 30; // '7d'→7, '14d'→14, '30d'→30
+  const apiParams = { days, ...(agencyType ? { agency: agencyType } : {}) };
 
   const fetch = useCallback(async () => {
     setLoading(true);
     setError(null);
     const results = await Promise.allSettled([
-      getDashboard(),
-      getIncidentsByType(params),
-      getResponseTimeTrend(params),
-      getStatusBreakdown(params),
-      getCrossAgencyStats(params),
+      getDashboard(agencyType ? { agency: agencyType } : {}),
+      getIncidentsByType(apiParams),
+      getResponseTimeTrend(apiParams),
+      getStatusBreakdown(apiParams),
+      getCrossAgencyStats({}),
     ]);
 
     const [dash, byType, trend, status, cross] = results;

@@ -4,8 +4,8 @@ function unwrap(response) {
   return response.data?.data ?? response.data;
 }
 
-export async function getDashboard() {
-  const res = await analyticsAxios.get('/analytics/dashboard');
+export async function getDashboard(params = {}) {
+  const res = await analyticsAxios.get('/analytics/dashboard', { params });
   return unwrap(res);
 }
 
