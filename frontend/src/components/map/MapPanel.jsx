@@ -172,17 +172,17 @@ export function MapPanel({
     onIncidentClick?.(incident);
   }, [onIncidentClick]);
 
-  const visibleIncidents = incidents.filter((inc) => {
+  const visibleIncidents = useMemo(() => incidents.filter((inc) => {
     if (!showIncidents) return false;
     if (!agencyFilters) return true;
     return agencyFilters[inc.type] !== false;
-  });
+  }), [incidents, showIncidents, agencyFilters]);
 
-  const visibleVehicles = vehicles.filter((v) => {
+  const visibleVehicles = useMemo(() => vehicles.filter((v) => {
     if (!showVehicles) return false;
     if (!agencyFilters) return true;
     return agencyFilters[v.agencyType || v.type] !== false;
-  });
+  }), [vehicles, showVehicles, agencyFilters]);
 
   const handleRegionClick = useCallback((region, e) => {
     const lat = e?.latLng?.lat?.();
@@ -313,7 +313,7 @@ export function MapPanel({
         onClick={handleMapClick}
         onZoomChanged={() => setZoomLevel(mapRef.current?.getZoom() ?? DEFAULT_ZOOM)}
       >
-        {/* REGIONS */}
+        {/* REGIONS
         {showRegions && ghanaRegions.map((region) => (
           <Polygon
             key={region.name}
@@ -332,7 +332,7 @@ export function MapPanel({
               {regionLabel.name}
             </div>
           </OverlayView>
-        )}
+        )} */}
 
         {/* INCIDENTS */}
         {!shouldCluster && visibleIncidents.map((inc) => (

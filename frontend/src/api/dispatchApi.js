@@ -38,3 +38,8 @@ export async function updateDispatchStatus(id, status) {
   const res = await dispatchAxios.patch(`/dispatches/${id}/status`, null, { params: { status } });
   return unwrap(res);
 }
+
+export async function simulateDispatch(lat, lng) {
+  const res = await dispatchAxios.post('/dispatches/simulate', null, { params: { lat, lng } });
+  return unwrap(res);
+}

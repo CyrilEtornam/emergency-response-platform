@@ -107,7 +107,13 @@ public class VehicleTrackingHandler extends TextWebSocketHandler {
             return;
 
         List<Vehicle> vehicles = vehicleService.getAllEntities();
-        vehicles.forEach(this::broadcastLocationUpdate);
+        vehicles.forEach(v -> {
+            try {
+                broadcastLocationUpdate(v);
+            } catch (Exception e) {
+                log.warn("broadcast error for vehicle {}: {}", v.getId(), e.getMessage());
+            }
+        });
     }
 
     private String extractToken(WebSocketSession session) {

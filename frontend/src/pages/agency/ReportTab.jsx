@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { useAuth } from '../../context/AuthContext';
-import { createIncident, autoDispatch } from '../../api/incidentApi';
+import { createIncident } from '../../api/incidentApi';
+import { simulateDispatch } from '../../api/dispatchApi';
 import { ROLE_TO_AGENCY, SEVERITY_LEVELS, AGENCY_COLORS } from '../../utils/constants';
 import { Button } from '../../components/common/Button';
 import { toast } from '../../components/common/Toast';
@@ -41,16 +42,21 @@ export function ReportTab({ pin, onPinClear, onSuccess }) {
       onPinClear();
       onSuccess?.();
 
-      // Auto-dispatch: find and assign nearest available responder
+      // Simulate dispatch: find first available vehicle and drive it to the incident
       setDispatchStatus('dispatching');
       try {
-        const responder = await autoDispatch(incident.id);
-        setDispatchStatus({ responder });
-        toast(`Dispatched: ${responder.name} (${responder.distanceKm} km away)`, 'success');
+        const result = await simulateDispatch(incident.latitude, incident.longitude);
+        if (result) {
+          setDispatchStatus({ callSign: result.callSign });
+          toast(`Unit ${result.callSign} dispatched — en route`, 'success');
+        } else {
+          setDispatchStatus('no_responder');
+          toast('Incident created — no available vehicles right now.', 'warning');
+        }
       } catch (dispatchErr) {
-        logger.warn('Auto-dispatch failed', dispatchErr);
+        logger.warn('Simulate dispatch failed', dispatchErr);
         setDispatchStatus('no_responder');
-        toast('Incident created — no available responders nearby. Assign manually.', 'warning');
+        toast('Incident created. Assign a unit manually.', 'warning');
       }
     } catch (err) {
       logger.error('Report incident failed', err);
@@ -103,9 +109,9 @@ export function ReportTab({ pin, onPinClear, onSuccess }) {
                 <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd"/>
               </svg>
               <div>
-                <p className="font-medium text-success">Responder dispatched</p>
-                <p className="text-primary text-[12px] mt-0.5">{dispatchStatus.responder.name}</p>
-                <p className="text-secondary text-[12px]">{dispatchStatus.responder.distanceKm} km away · en route</p>
+                <p className="font-medium text-success">Unit dispatched — en route</p>
+                <p className="text-primary text-[12px] mt-0.5">{dispatchStatus.callSign}</p>
+                <p className="text-secondary text-[12px]">Vehicle moving toward incident on map</p>
               </div>
             </>
           )}
