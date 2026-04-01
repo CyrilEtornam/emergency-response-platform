@@ -3,7 +3,8 @@ import { MapPanel } from '../../components/map/MapPanel';
 import { useIncidents } from '../../hooks/useIncidents';
 import { useVehicles } from '../../hooks/useVehicles';
 import { useWebSocket } from '../../hooks/useWebSocket';
-import { Badge } from '../../components/common/Badge';
+// import { Badge } from '../../components/common/Badge';
+import { Card } from '../../components/common/Card';
 import { WS_BASE_URL, AGENCY_COLORS } from '../../utils/constants';
 
 const AGENCY_FILTERS_DEFAULT = { MEDICAL: true, POLICE: true, FIRE: true };
