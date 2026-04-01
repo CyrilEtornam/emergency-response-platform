@@ -5,6 +5,7 @@ import com.erp.incident_service.dto.IncidentResponse;
 import com.erp.incident_service.model.Incident;
 import com.erp.incident_service.repository.IncidentRepository;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -12,9 +13,11 @@ import java.util.UUID;
 
 @Service
 @RequiredArgsConstructor
+@Slf4j
 public class IncidentService {
 
     private final IncidentRepository repo;
+    private final ResponderService responderService;
 
     public List<IncidentResponse> getAll(String type) {
         List<Incident> incidents;
@@ -43,7 +46,15 @@ public class IncidentService {
                 .reportedBy(reportedBy)
                 .status(Incident.IncidentStatus.REPORTED)
                 .build();
-        return IncidentResponse.from(repo.save(incident));
+        Incident saved = repo.save(incident);
+
+        try {
+            responderService.autoDispatch(saved.getId());
+        } catch (Exception e) {
+            log.warn("Auto-dispatch failed for incident {}: {}", saved.getId(), e.getMessage());
+        }
+
+        return IncidentResponse.from(repo.findById(saved.getId()).orElse(saved));
     }
 
     public IncidentResponse update(UUID id, IncidentRequest req) {

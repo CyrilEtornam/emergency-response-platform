@@ -91,7 +91,6 @@ export function MapPanel({
   const clustererRef = useRef(null);
   const clusterMarkersRef = useRef([]);
 
-  const [infoWindowIncident, setInfoWindowIncident] = useState(null);
   const [isLoaded, setIsLoaded] = useState(false);
   const [directions, setDirections] = useState(null);
   const [zoomLevel, setZoomLevel] = useState(DEFAULT_ZOOM);
@@ -170,7 +169,6 @@ export function MapPanel({
   }, [isReportTab, onMapClick]);
 
   const handleIncidentClick = useCallback((incident) => {
-    setInfoWindowIncident(incident);
     onIncidentClick?.(incident);
   }, [onIncidentClick]);
 
@@ -385,10 +383,10 @@ export function MapPanel({
         )}
 
         {/* INFO WINDOW */}
-        {infoWindowIncident && (
+        {selectedIncident && (
           <IncidentInfoWindow
-            incident={infoWindowIncident}
-            onClose={() => setInfoWindowIncident(null)}
+            incident={selectedIncident}
+            onClose={() => onIncidentClick?.(null)}
           />
         )}
 

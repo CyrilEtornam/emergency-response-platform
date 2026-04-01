@@ -66,7 +66,7 @@ export function AnalyticsTab() {
         />
         <StatCard
           label="Avg Response Time"
-          value={dashboard?.avgResponseTime != null ? `${Math.round(dashboard.avgResponseTime)} min` : '—'}
+          value={dashboard?.avgResponseTimeMinutes != null ? `${Math.round(dashboard.avgResponseTimeMinutes)} min` : '—'}
         />
         <StatCard
           label="Vehicles Deployed"
@@ -74,7 +74,7 @@ export function AnalyticsTab() {
         />
         <StatCard
           label="Resolved Today"
-          value={dashboard?.resolvedToday ?? '—'}
+          value={dashboard?.incidentsResolvedToday ?? '—'}
         />
       </div>
 

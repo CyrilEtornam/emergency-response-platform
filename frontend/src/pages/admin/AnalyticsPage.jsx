@@ -116,7 +116,7 @@ export function AnalyticsPage() {
             <SummaryCard label="Total Incidents" value={dashboard?.totalActiveIncidents} />
             <SummaryCard
               label="Avg Response Time"
-              value={dashboard?.avgResponseTime != null ? `${Math.round(dashboard.avgResponseTime)} min` : null}
+              value={dashboard?.avgResponseTimeMinutes != null ? `${Math.round(dashboard.avgResponseTimeMinutes)} min` : null}
             />
             <SummaryCard
               label="Fastest Response"

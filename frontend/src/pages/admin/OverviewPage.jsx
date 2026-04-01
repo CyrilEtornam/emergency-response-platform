@@ -38,7 +38,7 @@ function AgencyCard({ agency, data }) {
         </div>
         <div>
           <p className="text-[22px] font-semibold text-primary leading-none">
-            {data?.avgResponseTime != null ? `${Math.round(data.avgResponseTime)}m` : '—'}
+            {data?.avgResponseTimeMinutes != null ? `${Math.round(data.avgResponseTimeMinutes)}m` : '—'}
           </p>
           <p className="text-[11px] text-secondary mt-1">Avg resp.</p>
         </div>
@@ -132,7 +132,7 @@ export function OverviewPage() {
           />
           <StatCard
             label="Avg Response Time"
-            value={dashboard?.avgResponseTime != null ? `${Math.round(dashboard.avgResponseTime)} min` : '—'}
+            value={dashboard?.avgResponseTimeMinutes != null ? `${Math.round(dashboard.avgResponseTimeMinutes)} min` : '—'}
             sub="Today"
           />
           <StatCard
