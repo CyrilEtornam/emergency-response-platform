@@ -4,9 +4,29 @@
 -- ════════════════════════════════════════════════════════════════════════════════
 
 -- Delete existing data (vehicles first due to foreign key constraint)
-DELETE FROM dispatches;
-DELETE FROM vehicles;
-DELETE FROM stations;
+DO $$
+BEGIN
+    IF EXISTS (
+        SELECT 1 FROM information_schema.tables
+        WHERE table_schema = 'public' AND table_name = 'dispatches'
+    ) THEN
+        DELETE FROM dispatches;
+    END IF;
+
+    IF EXISTS (
+        SELECT 1 FROM information_schema.tables
+        WHERE table_schema = 'public' AND table_name = 'vehicles'
+    ) THEN
+        DELETE FROM vehicles;
+    END IF;
+
+    IF EXISTS (
+        SELECT 1 FROM information_schema.tables
+        WHERE table_schema = 'public' AND table_name = 'stations'
+    ) THEN
+        DELETE FROM stations;
+    END IF;
+END $$;
 
 -- ─────────────────────────────────────────────────────────────────────────────────
 -- GREATER ACCRA REGION
