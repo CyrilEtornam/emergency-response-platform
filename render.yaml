@@ -47,7 +47,9 @@ services:
           name: erp-postgres
           property: password
       - key: DB_NAME
-        value: auth_db
+        fromDatabase:
+          name: erp-postgres
+          property: database
       - key: REDIS_HOST
         sync: false
       - key: REDIS_PORT
@@ -131,4 +133,6 @@ services:
           name: erp-postgres
           property: password
       - key: DB_NAME
-        value: auth_db
+        fromDatabase:
+          name: erp-postgres
+          property: database
