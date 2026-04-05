@@ -10,6 +10,8 @@ envVarGroups:
     envVars:
       - key: JWT_SECRET
         generateValue: true
+      - key: APP_CORS_ALLOWED_ORIGINS
+        value: "http://localhost:3000,https://emergency-response-platform-blush.vercel.app,https://*.vercel.app"
       - key: RABBITMQ_HOST
         sync: false
       - key: RABBITMQ_PORT
