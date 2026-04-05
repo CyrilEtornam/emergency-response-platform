@@ -38,9 +38,28 @@ public class JwtService {
                       @Value("${jwt.expiry-ms}") long accessTokenExpiryMs,
                       @Value("${jwt.refresh-expiry-ms}") long refreshTokenExpiryMs) {
         this.redisTemplate = redisTemplate;
-        this.signingKey = Keys.hmacShaKeyFor(secret.getBytes(StandardCharsets.UTF_8));
+        String resolvedSecret = requireValidSecret(secret);
+        this.signingKey = Keys.hmacShaKeyFor(resolvedSecret.getBytes(StandardCharsets.UTF_8));
         this.accessTokenExpiryMs = accessTokenExpiryMs;
         this.refreshTokenExpiryMs = refreshTokenExpiryMs;
+    }
+
+    private String requireValidSecret(String secret) {
+        if (secret == null || secret.isBlank()) {
+            throw new IllegalStateException(
+                    "JWT_SECRET is required and must be at least 32 bytes for HS256 signing. "
+                            + "Set the JWT_SECRET environment variable before starting auth-service."
+            );
+        }
+
+        String resolved = secret.trim();
+        if (resolved.getBytes(StandardCharsets.UTF_8).length < 32) {
+            throw new IllegalStateException(
+                    "JWT_SECRET must be at least 32 bytes for HS256 signing."
+            );
+        }
+
+        return resolved;
     }
 
     public String generateAccessToken(User user) {
@@ -111,6 +130,9 @@ public class JwtService {
     }
 
     public String hashToken(String rawToken) {
+        if (rawToken == null || rawToken.isBlank()) {
+            throw new IllegalArgumentException("Refresh token cannot be null or blank");
+        }
         try {
             MessageDigest digest = MessageDigest.getInstance("SHA-256");
             byte[] hash = digest.digest(rawToken.getBytes(StandardCharsets.UTF_8));
